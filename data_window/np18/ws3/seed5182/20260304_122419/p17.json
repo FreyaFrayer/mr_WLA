@@ -1,0 +1,6500 @@
+{
+  "meta": {
+    "accepted_with_shortfall": false,
+    "attempts_total": 508,
+    "elapsed_total_s": 0.4922330379486084,
+    "found": 200,
+    "group": "panda_arm",
+    "ik_successes_total": 508,
+    "ik_timeout_s": 0.1,
+    "named_start_for_seeding": "ready",
+    "nullspace_jitter": 0.02,
+    "nullspace_step": 0.2,
+    "num_spaces": 10,
+    "pass_metas": [
+      {
+        "attempts": 400,
+        "elapsed_s": 0.44338488578796387,
+        "found": 199,
+        "group": "panda_arm",
+        "ik_successes": 400,
+        "ik_timeout_s": 0.1,
+        "named_start_for_seeding": "ready",
+        "nullspace_jitter": 0.02,
+        "nullspace_step": 0.2,
+        "num_spaces": 10,
+        "pass_index": 0,
+        "requested": 200,
+        "rng": {
+          "deterministic_joint_seeds": true,
+          "engine": "numpy.default_rng",
+          "note": "Avoid MoveIt internal RNG (RobotState.set_to_random_positions)."
+        },
+        "seed": 3406182,
+        "seed_pass": 3406182,
+        "target_point": {
+          "x": 0.18036031060296567,
+          "y": -0.08629733200847196,
+          "z": 0.49397168845798184
+        },
+        "tip_link": "panda_link8",
+        "uniq_resolution_rad": 0.001,
+        "yaw_range_rad": 6.283185307179586
+      },
+      {
+        "attempts": 108,
+        "elapsed_s": 0.048128604888916016,
+        "found": 1,
+        "group": "panda_arm",
+        "ik_successes": 108,
+        "ik_timeout_s": 0.1,
+        "named_start_for_seeding": "ready",
+        "nullspace_jitter": 0.02,
+        "nullspace_step": 0.2,
+        "num_spaces": 1,
+        "pass_index": 1,
+        "requested": 1,
+        "rng": {
+          "deterministic_joint_seeds": true,
+          "engine": "numpy.default_rng",
+          "note": "Avoid MoveIt internal RNG (RobotState.set_to_random_positions)."
+        },
+        "seed": 3506182,
+        "seed_pass": 3506182,
+        "target_point": {
+          "x": 0.18036031060296567,
+          "y": -0.08629733200847196,
+          "z": 0.49397168845798184
+        },
+        "tip_link": "panda_link8",
+        "uniq_resolution_rad": 0.001,
+        "yaw_range_rad": 6.283185307179586
+      }
+    ],
+    "pass_seed_stride": 100000,
+    "passes_requested": 3,
+    "passes_used": 2,
+    "precheck_attempts": 341,
+    "precheck_found": 50,
+    "precheck_ik_successes": 341,
+    "precheck_max_attempts": 400,
+    "precheck_num_spaces": 5,
+    "reason": "ok",
+    "requested": 200,
+    "resample_max": 200,
+    "resample_trial_final": 1,
+    "resample_trials_used": 1,
+    "seed": 3406182,
+    "shortfall": 0,
+    "target_point": {
+      "x": 0.18036031060296567,
+      "y": -0.08629733200847196,
+      "z": 0.49397168845798184
+    },
+    "tip_link": "panda_link8",
+    "uniq_resolution_rad": 0.001,
+    "yaw_range_rad": 6.283185307179586
+  },
+  "solutions": [
+    {
+      "attempt": 1,
+      "attempt_global": 1,
+      "index": 0,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.996959435628582,
+        -1.7628,
+        -0.5650024572443705,
+        -2.688385097819301,
+        -0.6711627674842192,
+        1.0067972918989792,
+        -1.1561988091119373
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 2,
+      "attempt_global": 2,
+      "index": 1,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.144633768449572,
+        1.7628,
+        2.57659218759329,
+        -2.6883862504745193,
+        -0.6711660630382215,
+        1.0067985024128887,
+        -1.1562002279438144
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 3,
+      "attempt_global": 3,
+      "index": 2,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.319984892212138,
+        1.723211031316033,
+        -2.5754676570212496,
+        -2.6971019000884078,
+        0.6566325655313145,
+        1.0520663494330793,
+        2.858299730677741
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 4,
+      "attempt_global": 4,
+      "index": 3,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.3496671122308364,
+        1.7058061937896463,
+        -2.5760419621977344,
+        -2.7008542277525747,
+        0.6494892279969504,
+        1.0716893277891881,
+        2.8825926752114555
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 5,
+      "attempt_global": 5,
+      "index": 4,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.9675030341010291,
+        1.382860409589301,
+        -2.730111783006332,
+        -2.766581772092019,
+        0.4091082445077861,
+        1.4142068518802366,
+        -2.8973
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 6,
+      "attempt_global": 6,
+      "index": 5,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.9985897007210902,
+        1.3706158251811298,
+        -2.744139623828619,
+        -2.7690602806634472,
+        0.39338777615458353,
+        1.4266030284150866,
+        -2.8722293547356976
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 7,
+      "attempt_global": 7,
+      "index": 6,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.0282070690493286,
+        1.359411376987273,
+        -2.7579370728225756,
+        -2.7713268327971994,
+        0.37818793993452515,
+        1.4379130855577187,
+        -2.848374506192512
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 8,
+      "attempt_global": 8,
+      "index": 7,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.059016136301055,
+        1.3482700655199054,
+        -2.772717293594361,
+        -2.7735963346436106,
+        0.36215997113964227,
+        1.449141802847394,
+        -2.823596498865707
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 9,
+      "attempt_global": 9,
+      "index": 8,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.0929258069027177,
+        1.3365863922756558,
+        -2.789485098138934,
+        -2.7759752592891145,
+        0.34425667481218997,
+        1.4608821180405966,
+        -2.796369157537387
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 10,
+      "attempt_global": 10,
+      "index": 9,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.127124445713618,
+        1.3254341660812752,
+        -2.8068752490966355,
+        -2.7782595042238585,
+        0.3259635630264098,
+        1.47207502525858,
+        -2.768949748128469
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 11,
+      "attempt_global": 11,
+      "index": 10,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.1613096890532195,
+        1.3149301821935409,
+        -2.824717782916771,
+        -2.780407078669099,
+        0.30745143312205897,
+        1.4825785353311964,
+        -2.7415851323307554
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 12,
+      "attempt_global": 12,
+      "index": 11,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.1930975868777534,
+        1.3057554464145817,
+        -2.841694740976411,
+        -2.7823017806448744,
+        0.2900497597604359,
+        1.4917521231626982,
+        -2.7161756251367932
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 13,
+      "attempt_global": 13,
+      "index": 12,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.227830395651466,
+        1.2963563701435372,
+        -2.860643401153804,
+        -2.78423635903005,
+        0.27084057039144815,
+        1.501120012950966,
+        -2.688460291843783
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 14,
+      "attempt_global": 14,
+      "index": 13,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.258013076839772,
+        1.2887464254231662,
+        -2.8774331615292796,
+        -2.7858130874960145,
+        0.2539873809471033,
+        1.5086986254994539,
+        -2.664405265581139
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 15,
+      "attempt_global": 15,
+      "index": 14,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.289013270411304,
+        1.281460907831141,
+        -2.894951528247537,
+        -2.7873309107770585,
+        0.23655400778261765,
+        1.515948671860666,
+        -2.6397366511620284
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 16,
+      "attempt_global": 16,
+      "index": 15,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.8252369596409396,
+        -1.6623304573834055,
+        -0.5612782428594607,
+        -2.7100526323608656,
+        -0.6296416503819102,
+        1.120045679865557,
+        -1.2967682895856762
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 17,
+      "attempt_global": 17,
+      "index": 16,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.8577698168695607,
+        -1.6813968153132988,
+        -0.563652084716129,
+        -2.706051533224359,
+        -0.6386989674440825,
+        1.0989546152986305,
+        -1.270152899956754
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 18,
+      "attempt_global": 18,
+      "index": 17,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.8888677394061011,
+        -1.6996512726097868,
+        -0.5651902001692936,
+        -2.7021750712932526,
+        -0.6468534001349425,
+        1.0785940605286153,
+        -1.2447097247912784
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 19,
+      "attempt_global": 19,
+      "index": 18,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.9200161219226178,
+        -1.717935141478192,
+        -0.566015897259124,
+        -2.698250338490108,
+        -0.6545103968528843,
+        1.0580322791216419,
+        -1.219214413951881
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 21,
+      "attempt_global": 21,
+      "index": 19,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.3376755670876477,
+        1.7128413568708332,
+        -2.575728924812985,
+        -2.699342675294935,
+        0.652436158906031,
+        1.0637775350453964,
+        2.872780940250265
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.657075433701077,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 22,
+      "attempt_global": 22,
+      "index": 20,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.3645724472543628,
+        1.6342239884669743,
+        2.585288943450785,
+        -2.71589283146496,
+        -0.6152234865000903,
+        1.1508464376274552,
+        -0.9253290832618996
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 27,
+      "attempt_global": 27,
+      "index": 21,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.2058550347237516,
+        1.7271294941939268,
+        2.575425956211324,
+        -2.6962515327242356,
+        -0.6581790038632706,
+        1.0476269596918188,
+        -0.7954814325836604
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 29,
+      "attempt_global": 29,
+      "index": 22,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.144633378532021,
+        1.7628,
+        2.5765897880457125,
+        -2.6883848992609027,
+        -0.6711620611119682,
+        1.006797231492781,
+        -0.7453322924992964
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 30,
+      "attempt_global": 30,
+      "index": 23,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.7989158491793588,
+        -1.2701107569263383,
+        0.21568634397355035,
+        -2.789691617488227,
+        0.20606727078200401,
+        1.52721663947979,
+        -2.1862192438732473
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 34,
+      "attempt_global": 34,
+      "index": 24,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.6646310608483035,
+        -1.2487891380302292,
+        0.13544152788373898,
+        -2.7941678084170563,
+        0.12847662092070947,
+        1.5483414782142424,
+        -2.07984627089597
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 40,
+      "attempt_global": 40,
+      "index": 25,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.4673294212159066,
+        -1.2356839799522172,
+        0.013168737460923242,
+        -2.7969392177214742,
+        0.012439257270118208,
+        1.56128270975425,
+        -1.9240895084930945
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 45,
+      "attempt_global": 45,
+      "index": 26,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.30282957609339123,
+        -1.2412617610873047,
+        -0.0894045802339519,
+        -2.795753874295237,
+        -0.0845912997313093,
+        1.5557727350831287,
+        -1.7943220551898122
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 50,
+      "attempt_global": 50,
+      "index": 27,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.1434023845151348,
+        -1.2610334001902843,
+        -0.1863629086615177,
+        -2.7915852407268886,
+        -0.1774987404690635,
+        1.5362074676036959,
+        -1.6682250096065259
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 55,
+      "attempt_global": 55,
+      "index": 28,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.02072153974937872,
+        -1.296243580532108,
+        -0.2806827832701002,
+        -2.784267472364619,
+        -0.2705730253286835,
+        1.5012372589183236,
+        -1.5377651201526876
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 61,
+      "attempt_global": 61,
+      "index": 29,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.21360419607739553,
+        -1.3567490741615365,
+        -0.3802221491121789,
+        -2.7718706144067804,
+        -0.3744424955605187,
+        1.440601056950212,
+        -1.383276068239551
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 66,
+      "attempt_global": 66,
+      "index": 30,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.3766164108855877,
+        -1.4233788758050319,
+        -0.45124314009035316,
+        -2.758431479840742,
+        -0.4555282014667908,
+        1.3729547642775448,
+        -1.2516423824440597
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 71,
+      "attempt_global": 71,
+      "index": 31,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.5364440689312602,
+        -1.5009283880311701,
+        -0.5061466605686563,
+        -2.742895399426882,
+        -0.5269826266148331,
+        1.2928501177182854,
+        -1.1217582311380891
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 25,
+      "attempt_global": 25,
+      "index": 32,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.267083966632654,
+        1.691215133951321,
+        2.577020542552084,
+        -2.703969302167962,
+        -0.6431543809057417,
+        1.0880238292593267,
+        -0.845595564243818
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 32,
+      "attempt_global": 32,
+      "index": 33,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.7333280832732203,
+        -1.2584344789325381,
+        0.1769194771989847,
+        -2.79213324053254,
+        0.16836439049553634,
+        1.5387856117329342,
+        -2.134204399813643
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 35,
+      "attempt_global": 35,
+      "index": 34,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.6300989805015962,
+        -1.244937885508671,
+        0.11430110678901288,
+        -2.7949832742983407,
+        0.10828077966695757,
+        1.5521457647615025,
+        -2.0525476492359602
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 37,
+      "attempt_global": 37,
+      "index": 35,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.5648222159787125,
+        -1.2394714616989988,
+        0.07397946969493405,
+        -2.796144612674642,
+        0.06995652739167173,
+        1.5575504939661589,
+        -2.0009963187959867
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 43,
+      "attempt_global": 43,
+      "index": 36,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.36878068793631924,
+        -1.2372313731686073,
+        -0.048424124563420115,
+        -2.7966123167858363,
+        -0.04575800460006846,
+        1.5597542621046385,
+        -1.846357082718125
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 48,
+      "attempt_global": 48,
+      "index": 37,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.2062813256271682,
+        -1.2515401467698142,
+        -0.14858908639467633,
+        -2.793587479132443,
+        -0.14107514171017133,
+        1.5456189662871314,
+        -1.7180172482755198
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 53,
+      "attempt_global": 53,
+      "index": 38,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.043775067744151956,
+        -1.280607781303282,
+        -0.24446229994091206,
+        -2.7875095521361635,
+        -0.23439110863533852,
+        1.5167977757710236,
+        -1.5891305569024523
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 56,
+      "attempt_global": 56,
+      "index": 39,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.05345703966031306,
+        -1.305053858747295,
+        -0.29855882064066475,
+        -2.78244239426971,
+        -0.2886842247210514,
+        1.4924457218802525,
+        -1.5116438996937451
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -2.2462089761446893,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 72,
+      "attempt_global": 72,
+      "index": 40,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.1446338525849407,
+        1.7627999961379799,
+        2.576589601651783,
+        -2.688384873602089,
+        -0.6711616828824662,
+        1.0067974782287936,
+        0.17620336772973239
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 73,
+      "attempt_global": 73,
+      "index": 41,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.2931345265623717,
+        1.2805319341228554,
+        -2.897299191197348,
+        -2.7875212912116836,
+        0.23422512225713366,
+        1.5168726129316603,
+        -1.304055594230882
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 74,
+      "attempt_global": 74,
+      "index": 42,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.8801834805699653,
+        1.374872847074209,
+        2.7391367691747823,
+        -2.7681961052909627,
+        -0.39896084607430615,
+        1.4222958291767067,
+        -0.42323782744850935
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 78,
+      "attempt_global": 78,
+      "index": 43,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.7534555715601123,
+        1.4285882142253212,
+        2.685883036037332,
+        -2.7573847253685266,
+        -0.46095686646100203,
+        1.3676245182106344,
+        -0.32076515084973956
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 84,
+      "attempt_global": 84,
+      "index": 44,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.5650321663332556,
+        1.5220016362321092,
+        2.6242455742519373,
+        -2.738669656353142,
+        -0.5434359564488168,
+        1.2707965746038106,
+        -0.16752649741486
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 89,
+      "attempt_global": 89,
+      "index": 45,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.407751731443792,
+        1.6093339171039245,
+        2.5912134293915727,
+        -2.7210182913218683,
+        -0.6013300668677699,
+        1.1778629616279117,
+        -0.039101168598220416
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 95,
+      "attempt_global": 95,
+      "index": 46,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.2213869063851224,
+        1.718040219670505,
+        2.575573138619787,
+        -2.6982296413153994,
+        -0.6545494424038096,
+        1.0579217360084345,
+        0.11334114614231891
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 76,
+      "attempt_global": 76,
+      "index": 47,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.8164201187583826,
+        1.4009028914890782,
+        2.7112619170862136,
+        -2.7629463143521535,
+        -0.43072898531304277,
+        1.3958849070831179,
+        -0.3717511109410379
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 77,
+      "attempt_global": 77,
+      "index": 48,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.7852126095783603,
+        1.4144013354037153,
+        2.6984035095399346,
+        -2.760241274901772,
+        -0.4458729036693822,
+        1.3821300291448637,
+        -0.3464918847754817
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 79,
+      "attempt_global": 79,
+      "index": 49,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.722862105376637,
+        1.442732286571285,
+        2.674359715872908,
+        -2.7545523618759553,
+        -0.4752112268179569,
+        1.3531170195164208,
+        -0.295956337268966
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 80,
+      "attempt_global": 80,
+      "index": 50,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.689718164528221,
+        1.4585183711042045,
+        2.6625210191209807,
+        -2.7513858799201127,
+        -0.4902880466683434,
+        1.3368557832794292,
+        -0.2690368083163984
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 82,
+      "attempt_global": 82,
+      "index": 51,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.6267997968382284,
+        1.4898031384834247,
+        2.6419365968122754,
+        -2.7451253681615086,
+        -0.5178447507729225,
+        1.3044455540134179,
+        -0.21785800256196253
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 83,
+      "attempt_global": 83,
+      "index": 52,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.5965339043451072,
+        1.5054067425487203,
+        2.632951261276052,
+        -2.7419990369841405,
+        -0.5305705781474727,
+        1.2881766813891513,
+        -0.19320477362060628
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 85,
+      "attempt_global": 85,
+      "index": 53,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.5308228257674865,
+        1.5404097412020044,
+        2.615566499690781,
+        -2.7349725704438215,
+        -0.5569494970536958,
+        1.2514190031917762,
+        -0.13962064802191593
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 87,
+      "attempt_global": 87,
+      "index": 54,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.4708966962993655,
+        1.5735005804036608,
+        2.602347920573722,
+        -2.728296690492389,
+        -0.5794097364491803,
+        1.2163067340658753,
+        -0.09069831100235316
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 88,
+      "attempt_global": 88,
+      "index": 55,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.437849841015947,
+        1.5921450625640716,
+        2.596161336045643,
+        -2.7245169142325043,
+        -0.5911075323299718,
+        1.1963569920875574,
+        -0.06369559426829031
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 90,
+      "attempt_global": 90,
+      "index": 56,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.377822460824667,
+        1.6265624462283834,
+        2.5869631891583915,
+        -2.7174786201551093,
+        -0.611053490895157,
+        1.1591945840970048,
+        -0.01463256647829014
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 91,
+      "attempt_global": 91,
+      "index": 57,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.345259184490918,
+        1.6454684327671067,
+        2.5830977261519474,
+        -2.7135674722731173,
+        -0.6211281514136904,
+        1.1385671824743793,
+        0.01199668194879147
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 93,
+      "attempt_global": 93,
+      "index": 58,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.284568459553552,
+        1.6809554160335294,
+        2.5779840522594264,
+        -2.706140833322986,
+        -0.6384974892917638,
+        1.099438252608621,
+        0.06164484411313236
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 94,
+      "attempt_global": 94,
+      "index": 59,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.252641266041836,
+        1.6996976058072557,
+        2.576389589342747,
+        -2.70216858852691,
+        -0.6468828281356855,
+        1.0785450066813067,
+        0.08776674654534358
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -1.3246730094662666,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 97,
+      "attempt_global": 97,
+      "index": 60,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.554504519367819,
+        -1.568606537660713,
+        0.5374766632896905,
+        -2.7292860578666565,
+        0.5762309191043459,
+        1.2215221243105157,
+        -1.4701169382020811
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 100,
+      "attempt_global": 100,
+      "index": 61,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.4597252838462507,
+        -1.5170360710310085,
+        0.5148211870893081,
+        -2.7396716079350996,
+        0.5396469704112903,
+        1.2760080603644668,
+        -1.3927717243668056
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 102,
+      "attempt_global": 102,
+      "index": 62,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.3986346834822738,
+        -1.4853831740392622,
+        0.4969521286714566,
+        -2.746015828336371,
+        0.5141106564474603,
+        1.3090445009352822,
+        -1.3430066689886921
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 105,
+      "attempt_global": 105,
+      "index": 63,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.303260638515765,
+        -1.4389761701310855,
+        0.4642619699994327,
+        -2.7553026052308467,
+        0.47149948554318655,
+        1.3569709479891965,
+        -1.2654913021325236
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 107,
+      "attempt_global": 107,
+      "index": 64,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.240109921268725,
+        -1.4105387196650012,
+        0.4396134875709258,
+        -2.761017718686185,
+        0.4416290935453926,
+        1.3860721392232633,
+        -1.2143156556573145
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 110,
+      "attempt_global": 110,
+      "index": 65,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.1436541402141358,
+        -1.3708839530756562,
+        0.39775301561358434,
+        -2.76901100696518,
+        0.3937267822178021,
+        1.4263297838351028,
+        -1.1364119693610948
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 112,
+      "attempt_global": 112,
+      "index": 66,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.0795468834293174,
+        -1.3471991973501891,
+        0.36739504681115115,
+        -2.773810129109577,
+        0.3605630988042262,
+        1.4502139841077384,
+        -1.0848156949616157
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 115,
+      "attempt_global": 115,
+      "index": 67,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.9864226568738738,
+        -1.3167741260139252,
+        0.3201207481130604,
+        -2.780034906695007,
+        0.31080489330680766,
+        1.4807398503622242,
+        -1.0101550296864061
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 118,
+      "attempt_global": 118,
+      "index": 68,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.8887410084508258,
+        -1.290028536707619,
+        0.26705063053758826,
+        -2.785560257629262,
+        0.2568806876356646,
+        1.5074328202058418,
+        -0.9321686811651605
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 120,
+      "attempt_global": 120,
+      "index": 69,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.8232081168026983,
+        -1.275063200264177,
+        0.22978816315793327,
+        -2.7886676077320174,
+        0.21990598791391708,
+        1.5223104853303029,
+        -0.8800342640932955
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 123,
+      "attempt_global": 123,
+      "index": 70,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.7244582326904003,
+        -1.2570407989257142,
+        0.17161442993818504,
+        -2.792427502868832,
+        0.1632346199056906,
+        1.5401666144290485,
+        -0.8017074054885821
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 125,
+      "attempt_global": 125,
+      "index": 71,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.6588271913256564,
+        -1.248113129689707,
+        0.13189653921710626,
+        -2.794316354868643,
+        0.12508211305675332,
+        1.5490073928034778,
+        -0.7497698913024298
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 128,
+      "attempt_global": 128,
+      "index": 72,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.5634374684477497,
+        -1.2393609067557656,
+        0.07311359157424528,
+        -2.7961541757226422,
+        0.06913290042547185,
+        1.557648563018199,
+        -0.674426558373896
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 130,
+      "attempt_global": 130,
+      "index": 73,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.4982616963561594,
+        -1.2363032553728608,
+        0.0325052697491147,
+        -2.796800000136627,
+        0.03070416269991801,
+        1.560661016274686,
+        -0.6229992397796815
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 133,
+      "attempt_global": 133,
+      "index": 74,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.3991189083492099,
+        -1.236189399452252,
+        -0.029497500733201468,
+        -2.796832939630378,
+        -0.027866975487365667,
+        1.5607832315032557,
+        -0.5448102899798025
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 136,
+      "attempt_global": 136,
+      "index": 75,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.30558799451326374,
+        -1.24104869189326,
+        -0.08769554757147012,
+        -2.795798450149607,
+        -0.0829670516492304,
+        1.5559825212883904,
+        -0.4710111256451465
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 138,
+      "attempt_global": 138,
+      "index": 76,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.23844136092517418,
+        -1.2475524696939937,
+        -0.12902274859716886,
+        -2.7944341500531786,
+        -0.12233529168271152,
+        1.549566029145047,
+        -0.41796727325073096
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 141,
+      "attempt_global": 141,
+      "index": 77,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.1438475862779186,
+        -1.2609631697371837,
+        -0.18608945269629587,
+        -2.7916081093656944,
+        -0.1772389001378126,
+        1.5362842894088613,
+        -0.3430951866085268
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 143,
+      "attempt_global": 143,
+      "index": 78,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.0777886314736395,
+        -1.2733014190420997,
+        -0.22490261392865143,
+        -2.7890294359934695,
+        -0.21510364853644615,
+        1.5240530303082735,
+        -0.2906801702433379
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 146,
+      "attempt_global": 146,
+      "index": 79,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.01576123629276367,
+        -1.294949331236091,
+        -0.27793853910046296,
+        -2.784531497197378,
+        -0.26780690909468613,
+        1.502525650042819,
+        -0.2162372809131278
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.9207271812597977,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 147,
+      "attempt_global": 147,
+      "index": 80,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.144633359948656,
+        1.7628,
+        2.5765911549760863,
+        -2.688385556486754,
+        -0.6711643322437173,
+        1.0067975663499402,
+        0.9276428805493951
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 148,
+      "attempt_global": 148,
+      "index": 81,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.3526701502782237,
+        -1.4625209006890703,
+        0.4819096962863109,
+        -2.750584394893993,
+        0.49397712845482433,
+        1.3327238980820153,
+        -0.958121364017652
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 149,
+      "attempt_global": 149,
+      "index": 82,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.3207759033822226,
+        -1.447196273727513,
+        0.4706894741406987,
+        -2.7536527660332317,
+        0.47956385738752877,
+        1.3485206108853593,
+        -0.9322111469606015
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 155,
+      "attempt_global": 155,
+      "index": 83,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.1302008417124683,
+        -1.3657107042739252,
+        0.39154014554625977,
+        -2.7700551329920406,
+        0.38684555092025863,
+        1.4315629575831308,
+        -0.7780729531872866
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 161,
+      "attempt_global": 161,
+      "index": 84,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.9378751368987244,
+        -1.3028133689942951,
+        0.29414292352003146,
+        -2.782907579398834,
+        0.2841914661823555,
+        1.4946849286181576,
+        -0.6238577216727613
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 167,
+      "attempt_global": 167,
+      "index": 85,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.7371916187942935,
+        -1.2590547260653697,
+        0.17923377065013676,
+        -2.792001936875049,
+        0.1705991356025561,
+        1.5381676817957441,
+        -0.46429488915608635
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 173,
+      "attempt_global": 173,
+      "index": 86,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.5403722540550089,
+        -1.2380096277720385,
+        0.05876876302488447,
+        -2.79644371416275,
+        0.05554442659630722,
+        1.5589861067147064,
+        -0.30872978750107893
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 178,
+      "attempt_global": 178,
+      "index": 87,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.380903473861502,
+        -1.236761602212501,
+        -0.04086783469022887,
+        -2.796716523545806,
+        -0.038614109802839636,
+        1.5602216720874564,
+        -0.18294838396069607
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 184,
+      "attempt_global": 184,
+      "index": 88,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.18355187145381574,
+        -1.2547259160142603,
+        -0.16233211802115718,
+        -2.7929195896170165,
+        -0.15429286061069403,
+        1.542467281461792,
+        -0.027050288533619918
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 190,
+      "attempt_global": 190,
+      "index": 89,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.01330436649592204,
+        -1.2943184158804488,
+        -0.27657685098659773,
+        -2.7846605991248845,
+        -0.266433713698957,
+        1.50315621452687,
+        0.1292916663583187
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 196,
+      "attempt_global": 196,
+      "index": 90,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.20161929559867542,
+        -1.352403760334417,
+        -0.37448970629944495,
+        -2.7727534892210635,
+        -0.36821842965415047,
+        1.4449772882645737,
+        0.2800597581432773
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 150,
+      "attempt_global": 150,
+      "index": 91,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.2875829096256697,
+        -1.4317368276956701,
+        0.45835549980590246,
+        -2.756753850721793,
+        0.46419734897565784,
+        1.3643973032785817,
+        -0.9052775659797588
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 152,
+      "attempt_global": 152,
+      "index": 92,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.2241737647332018,
+        -1.4036437872693328,
+        0.4330301594034303,
+        -2.762393976239644,
+        0.43387996939768625,
+        1.3930937482791705,
+        -0.8539262725278824
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 157,
+      "attempt_global": 157,
+      "index": 93,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.0652662193121272,
+        -1.3422270097860889,
+        0.36037716227801575,
+        -2.774822554231946,
+        0.35304418593858433,
+        1.4552132855594662,
+        -0.7258497658492513
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 160,
+      "attempt_global": 160,
+      "index": 94,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.9720582092143188,
+        -1.31249964552868,
+        0.3125207282618085,
+        -2.7809043633860964,
+        0.3029664959658872,
+        1.4850052071023812,
+        -0.6511688480549938
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 162,
+      "attempt_global": 162,
+      "index": 95,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.9056223758097799,
+        -1.2942669210983904,
+        0.2764430528401515,
+        -2.7846725504037657,
+        0.2663059444894674,
+        1.5032003137497203,
+        -0.598132787976875
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 165,
+      "attempt_global": 165,
+      "index": 96,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.8037576065881876,
+        -1.2710759973857633,
+        0.21851038041523102,
+        -2.7894928282570732,
+        0.20883202653307012,
+        1.526261991541498,
+        -0.5170834890214253
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 168,
+      "attempt_global": 168,
+      "index": 97,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.703420105246526,
+        -1.2539097685983762,
+        0.15895425471997277,
+        -2.7930887439443737,
+        0.15103333443292383,
+        1.543271933386,
+        -0.4375496187549935
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 170,
+      "attempt_global": 170,
+      "index": 98,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.6379578671975995,
+        -1.245750555730382,
+        0.11912354026980841,
+        -2.7948065195488594,
+        0.11287974105138687,
+        1.551338893921274,
+        -0.3857742919973521
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 175,
+      "attempt_global": 175,
+      "index": 99,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.47833058376584536,
+        -1.2358404479371008,
+        0.02004739912385005,
+        -2.7969023232481147,
+        0.018933940405513022,
+        1.5611258199518896,
+        -0.2597883343104666
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": -0.5732330629399982,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 197,
+      "attempt_global": 197,
+      "index": 100,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.8895132920721147,
+        -1.7627999995133306,
+        0.5650030518693725,
+        -2.6883848730253384,
+        0.6711616839566266,
+        1.0067974748116308,
+        -0.24924237573257335
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 200,
+      "attempt_global": 200,
+      "index": 101,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.7989139809831787,
+        -1.7099058047462095,
+        0.5657456752527511,
+        -2.6999738186983406,
+        0.6512176371289682,
+        1.067083943154771,
+        -0.1750420903769565
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 202,
+      "attempt_global": 202,
+      "index": 102,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.7340493066965614,
+        -1.671852711323157,
+        0.5625601796792441,
+        -2.70805961244539,
+        0.6342340182644193,
+        1.1095342485704038,
+        -0.12197073110614183
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 205,
+      "attempt_global": 205,
+      "index": 103,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.6377956604431276,
+        -1.615882810649194,
+        0.5520707304188314,
+        -2.7196754974025947,
+        0.6050764777971858,
+        1.1707744429726439,
+        -0.04326512597961086
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 207,
+      "attempt_global": 207,
+      "index": 104,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.5753797713912048,
+        -1.5803120410315974,
+        0.5416075029969493,
+        -2.7269154667366466,
+        0.5837628222481963,
+        1.2090268013505678,
+        0.007745660406003653
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 210,
+      "attempt_global": 210,
+      "index": 105,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.4827415041044374,
+        -1.529288440020759,
+        0.5208988493810515,
+        -2.7372083876681383,
+        0.5488774437352085,
+        1.2631406106513245,
+        0.08337558076559044
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 212,
+      "attempt_global": 212,
+      "index": 106,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.4186515730817983,
+        -1.4956008616581402,
+        0.5030808077866726,
+        -2.7439731208210727,
+        0.5226383744084987,
+        1.29841573315723,
+        0.13561057385042638
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 215,
+      "attempt_global": 215,
+      "index": 107,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.3211430739645686,
+        -1.4473708732639288,
+        0.470820495050736,
+        -2.7536191349529435,
+        0.4797314378461407,
+        1.3483423026628036,
+        0.2149128778411799
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 218,
+      "attempt_global": 218,
+      "index": 108,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.2301131876479856,
+        -1.4061916792634885,
+        0.4354986438537287,
+        -2.7618831836677793,
+        0.4367751477615827,
+        1.3905001746084609,
+        0.2886925527636607
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 220,
+      "attempt_global": 220,
+      "index": 109,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.1694395058955955,
+        -1.3809948293414582,
+        0.40941082584432975,
+        -2.766958253948544,
+        0.406770926151608,
+        1.4160975809065086,
+        0.3377159087107008
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 223,
+      "attempt_global": 223,
+      "index": 110,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.0727150919452193,
+        -1.3448195557838867,
+        0.3640445149809748,
+        -2.7743074914366592,
+        0.356974675580525,
+        1.4526173622583398,
+        0.4155821372969372
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 225,
+      "attempt_global": 225,
+      "index": 111,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.0083500257646683,
+        -1.3235150592372673,
+        0.33156836952654856,
+        -2.7786522026056764,
+        0.3226845033211799,
+        1.4739916405390807,
+        0.4672105456697786
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 228,
+      "attempt_global": 228,
+      "index": 112,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.9118718378788753,
+        -1.2958981515009567,
+        0.2799078553908076,
+        -2.7843466740777827,
+        0.2697942285514626,
+        1.5015853022200274,
+        0.5443100240526849
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 231,
+      "attempt_global": 231,
+      "index": 113,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.8129739120907802,
+        -1.2729383840678254,
+        0.2238639645686825,
+        -2.7891090824523515,
+        0.21408406403009472,
+        1.5244157969144103,
+        0.6230149828121839
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 233,
+      "attempt_global": 233,
+      "index": 114,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.751584013544192,
+        -1.2614437296337813,
+        0.18780548649691492,
+        -2.791504003578805,
+        0.17890236676041427,
+        1.5358089334257097,
+        0.6717235971196999
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 236,
+      "attempt_global": 236,
+      "index": 115,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.652880356568904,
+        -1.2474007258673785,
+        0.12825805162896517,
+        -2.794457956646598,
+        0.12160211831964315,
+        1.5497078309103751,
+        0.7498501718676136
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 238,
+      "attempt_global": 238,
+      "index": 116,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.584413876583822,
+        -1.2408480887174098,
+        0.08612203921067961,
+        -2.7958408321525305,
+        0.08147454639919911,
+        1.5561812369991466,
+        0.8039344728548918
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 241,
+      "attempt_global": 241,
+      "index": 117,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.4886179680776487,
+        -1.2360471459124538,
+        0.02648098938884303,
+        -2.7968583124203805,
+        0.025013431471112,
+        1.560923665333985,
+        0.8795160655999625
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 243,
+      "attempt_global": 243,
+      "index": 118,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.42319766278970083,
+        -1.2357009650663089,
+        -0.014436613031296827,
+        -2.7969314913318652,
+        -0.013634201795508739,
+        1.561263778326005,
+        0.9311129466223554
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 246,
+      "attempt_global": 246,
+      "index": 119,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.32429558212598375,
+        -1.2396916656980679,
+        -0.07610244236164541,
+        -2.796095339352153,
+        -0.07196512834852216,
+        1.5573363596925984,
+        1.00914034962554
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.5741884918095113,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 247,
+      "attempt_global": 247,
+      "index": 120,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.2931267036071863,
+        1.2805283679828858,
+        -2.8973,
+        -2.787518262235216,
+        0.23422509694506252,
+        1.516871053265828,
+        0.7639591785670594
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 248,
+      "attempt_global": 248,
+      "index": 121,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.762639423296149,
+        1.4244261936324705,
+        2.6894417941303206,
+        -2.7582175812792142,
+        -0.4566283132656201,
+        1.3718810338650302,
+        1.7398011781958278
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 251,
+      "attempt_global": 251,
+      "index": 122,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.661942706986479,
+        1.4721217752244093,
+        2.6531262265359885,
+        -2.748659171149926,
+        -0.5026267820341768,
+        1.322790130753091,
+        1.8215543700984311
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 257,
+      "attempt_global": 257,
+      "index": 123,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.4708156912775543,
+        1.5735454397133088,
+        2.6023340017719967,
+        -2.7282865187396452,
+        -0.5794357228096647,
+        1.2162585355103437,
+        1.9773858217817744
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 264,
+      "attempt_global": 264,
+      "index": 124,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.252675778290284,
+        1.6996702103270795,
+        2.5763870824667805,
+        -2.7021700363568666,
+        -0.6468775882918836,
+        1.078572361954057,
+        2.1557510937644953
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 268,
+      "attempt_global": 268,
+      "index": 125,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.2618498599349257,
+        1.6942957296055468,
+        2.5767744511281654,
+        -2.7033223989445148,
+        -0.644518504814917,
+        1.0845885848812271,
+        2.1482423308497434
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 272,
+      "attempt_global": 272,
+      "index": 126,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.1446338482588065,
+        1.7627999988659762,
+        2.576589601702638,
+        -2.6883848731479953,
+        -0.6711616837265858,
+        1.0067974755077989,
+        2.2442186658619057
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 273,
+      "attempt_global": 273,
+      "index": 127,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.2677984528333922,
+        -1.2443891644137304,
+        -0.11101088081952033,
+        -2.7950945378076315,
+        -0.10514288862755929,
+        1.5526847325085338,
+        1.2229040397462878
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 277,
+      "attempt_global": 277,
+      "index": 128,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.141273721027416,
+        -1.261395916915249,
+        -0.18762332135682597,
+        -2.7915135216703426,
+        -0.1787246730234092,
+        1.53585527552988,
+        1.3230122601880208
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 283,
+      "attempt_global": 283,
+      "index": 129,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.04984321255216912,
+        -1.30405600041751,
+        -0.296604030777791,
+        -2.7826475230777405,
+        -0.28669517008751605,
+        1.493441445982058,
+        1.4750236563391168
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 290,
+      "attempt_global": 290,
+      "index": 130,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.2772563629304773,
+        -1.3811552109447764,
+        -0.4095750572038662,
+        -2.7669287099095676,
+        -0.40695468452812417,
+        1.4159354063890544,
+        1.6575602989833969
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 296,
+      "attempt_global": 296,
+      "index": 131,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.4710232164182188,
+        -1.4678651266124765,
+        -0.4856050926588564,
+        -2.7495129501050672,
+        -0.4988280577335841,
+        1.3271971420616338,
+        1.8145468559186422
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 250,
+      "attempt_global": 250,
+      "index": 132,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.694858383192476,
+        1.4560367755593315,
+        2.664316594544603,
+        -2.751884053238818,
+        -0.4879706037637652,
+        1.3394175767280343,
+        1.7948018400052856
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 252,
+      "attempt_global": 252,
+      "index": 133,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.629388918049361,
+        1.488481808848489,
+        2.6427322226511647,
+        -2.7453896076103317,
+        -0.516742032752137,
+        1.3058185684853507,
+        1.848050631849352
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 255,
+      "attempt_global": 255,
+      "index": 134,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.534444072889995,
+        1.5384422643934772,
+        2.6164521325398034,
+        -2.7353681869726656,
+        -0.555538400360783,
+        1.2534954374145444,
+        1.9254370308449225
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 260,
+      "attempt_global": 260,
+      "index": 135,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.3769154332394855,
+        1.6270847655860667,
+        2.5868430046581494,
+        -2.7173650685532893,
+        -0.6113411808450016,
+        1.1586166686746338,
+        2.0541265413586505
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 262,
+      "attempt_global": 262,
+      "index": 136,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.3127360798347207,
+        1.664465917890605,
+        2.5800188996378344,
+        -2.709616295907521,
+        -0.6306700402790266,
+        1.1176959528436623,
+        2.1066171016515174
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 265,
+      "attempt_global": 265,
+      "index": 137,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.2196979022297536,
+        1.7190194256695894,
+        2.575547050595267,
+        -2.6980097198186903,
+        -0.6549537497750336,
+        1.0568066007598493,
+        2.1827374995565494
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 270,
+      "attempt_global": 270,
+      "index": 138,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -2.1998271790895814,
+        1.7306594326657228,
+        2.575418627833914,
+        -2.6954875918444277,
+        -0.6595517218609125,
+        1.043623839047601,
+        2.1990048980520545
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 275,
+      "attempt_global": 275,
+      "index": 139,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.20587367238128415,
+        -1.2516073950189865,
+        -0.14883589549708515,
+        -2.7935750962345085,
+        -0.14131215677678116,
+        1.545548628196124,
+        1.271860570688818
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 0.74334228488057,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 297,
+      "attempt_global": 297,
+      "index": 140,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.2520790484705848,
+        1.762799807897468,
+        -2.5765898016397184,
+        -2.688384693835524,
+        0.671161789215688,
+        1.0067969571423032,
+        0.6236359956233709
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 299,
+      "attempt_global": 299,
+      "index": 141,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.3143454359699138,
+        1.7265169271734557,
+        -2.5754312686070935,
+        -2.6963855269725805,
+        0.6579358868383791,
+        1.0483182207665664,
+        0.6746371791375633
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 301,
+      "attempt_global": 301,
+      "index": 142,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.3747775289067228,
+        1.6910698697935125,
+        -2.577027687798718,
+        -2.7039930005121255,
+        0.6430907213736753,
+        1.0881778703726386,
+        0.724099030676957
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 302,
+      "attempt_global": 302,
+      "index": 143,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.4069422730937258,
+        1.6722006320713005,
+        -2.5789902298716822,
+        -2.707981954919398,
+        0.6344015283510581,
+        1.1091465003368197,
+        0.7504195290834252
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 304,
+      "attempt_global": 304,
+      "index": 144,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.4678271189738616,
+        1.636662073530808,
+        -2.5848001237143956,
+        -2.715391723763955,
+        0.6165061691455416,
+        1.1481930678675965,
+        0.8002098980258797
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 306,
+      "attempt_global": 306,
+      "index": 145,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.5315677750456413,
+        1.5999543882828353,
+        -2.593828528094823,
+        -2.7229235490131356,
+        0.595808089898176,
+        1.187958677281688,
+        0.8523087618465908
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 307,
+      "attempt_global": 307,
+      "index": 146,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.5612500287373288,
+        1.583118897907869,
+        -2.5990507598233736,
+        -2.7263525214340363,
+        0.5855233061166399,
+        1.2060318130903505,
+        0.8765659253361068
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 309,
+      "attempt_global": 309,
+      "index": 147,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.6277107606594565,
+        1.5461780785537609,
+        -2.6130563703032244,
+        -2.733814128485203,
+        0.5610220198515236,
+        1.2453222607055867,
+        0.9308424653486133
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 311,
+      "attempt_global": 311,
+      "index": 148,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.686785277156591,
+        1.5144216076871315,
+        -2.628121369921498,
+        -2.7401923834749375,
+        0.5376380855136482,
+        1.2787475268193897,
+        0.9790315733618874
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 313,
+      "attempt_global": 313,
+      "index": 149,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.7497841165937467,
+        1.481928408129469,
+        -2.6467909802459118,
+        -2.74670200288645,
+        0.5111665399957219,
+        1.3126274508956657,
+        1.030341979690593
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 314,
+      "attempt_global": 314,
+      "index": 150,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.780295417355228,
+        1.4667400875141605,
+        -2.656756030472021,
+        -2.749738804095244,
+        0.4978133829582758,
+        1.328361857902525,
+        1.0551643363451129
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 316,
+      "attempt_global": 316,
+      "index": 151,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.8458558339221527,
+        1.4354949970737536,
+        -2.680148067190444,
+        -2.7559996502540534,
+        0.46800130165546355,
+        1.3605411481651268,
+        1.1084076857214278
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 318,
+      "attempt_global": 318,
+      "index": 152,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.9064260364621546,
+        1.4083808790433519,
+        -2.7040061993976923,
+        -2.761444733621196,
+        0.43923073576474014,
+        1.3882704850014163,
+        1.1574829676627258
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 320,
+      "attempt_global": 320,
+      "index": 153,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        1.9724886794074477,
+        1.3808632805188508,
+        -2.7323211306893134,
+        -2.766988048820426,
+        0.4066159780530398,
+        1.4162326458228847,
+        1.2108610460628624
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 321,
+      "attempt_global": 321,
+      "index": 154,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.0053597399997867,
+        1.3680119015847005,
+        -2.74725426093206,
+        -2.769584521208549,
+        0.389935593762711,
+        1.4292326843112468,
+        1.2373669534299234
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 323,
+      "attempt_global": 323,
+      "index": 155,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.0678578707571456,
+        1.3451501810659927,
+        -2.7770462351363125,
+        -2.7742243391842356,
+        0.3575093205039598,
+        1.452275520619982,
+        1.287647403567971
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 325,
+      "attempt_global": 325,
+      "index": 156,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.129868410049881,
+        1.3245710131375843,
+        -2.80828636040348,
+        -2.7784332726934022,
+        0.3244901821303344,
+        1.4729325927620656,
+        1.3373928427681514
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 327,
+      "attempt_global": 327,
+      "index": 157,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.1947358405708446,
+        1.3052892760348727,
+        -2.8425797362890046,
+        -2.7823906472548017,
+        0.2891472652820214,
+        1.4922092697636504,
+        1.3892728853904777
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 328,
+      "attempt_global": 328,
+      "index": 158,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.227195909193221,
+        1.2965372474465608,
+        -2.86029999743609,
+        -2.784207934591848,
+        0.2711865577444321,
+        1.5009451163720613,
+        1.4151738487894217
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 330,
+      "attempt_global": 330,
+      "index": 159,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        2.2898337020856427,
+        1.281275917618947,
+        -2.895412138467871,
+        -2.787368772569347,
+        0.23609692114557929,
+        1.5161359571205315,
+        1.4650638431582381
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 1.4470667463121014,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 332,
+      "attempt_global": 332,
+      "index": 160,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.12460569973746469,
+        -1.2642975288980107,
+        -0.19750025446687292,
+        -2.7909055241442107,
+        -0.18831913970068434,
+        1.532980551296043,
+        2.8973
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 334,
+      "attempt_global": 334,
+      "index": 161,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.48365020721584256,
+        -1.4741101402159054,
+        -0.4897831221822405,
+        -2.748264635520333,
+        -0.5043839622541515,
+        1.320736120636273,
+        -2.8973
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 337,
+      "attempt_global": 337,
+      "index": 162,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.5825465035470355,
+        -1.525213766597223,
+        -0.5189251823679321,
+        -2.7380359285794933,
+        -0.5458407621403771,
+        1.267430653241162,
+        -2.816740475379314
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 344,
+      "attempt_global": 344,
+      "index": 163,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.7997816154578424,
+        -1.6474823249382669,
+        -0.5588621836215716,
+        -2.7131565510423017,
+        -0.6221697535332202,
+        1.136368784897661,
+        -2.6392817316387465
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 350,
+      "attempt_global": 350,
+      "index": 164,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.9846070476314258,
+        -1.7556399851568552,
+        -0.5654599881823281,
+        -2.689988396703219,
+        -0.668711812221157,
+        1.0150593841270361,
+        -2.488014384220921
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 351,
+      "attempt_global": 351,
+      "index": 165,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.889513864402128,
+        -1.7628,
+        0.5650027055560856,
+        -2.6883849733107206,
+        0.6711623414200126,
+        1.0067972283256974,
+        1.4809836450246938
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 352,
+      "attempt_global": 352,
+      "index": 166,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.8580464956616554,
+        -1.7445125072928067,
+        0.565935865808295,
+        -2.6924472931589785,
+        0.6647431753664357,
+        1.0278273220326193,
+        1.506774033156142
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 360,
+      "attempt_global": 360,
+      "index": 167,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.6099713309883397,
+        -1.5999202103778003,
+        0.5477567958466121,
+        -2.7229298144672485,
+        0.5957978983745804,
+        1.1879992589571777,
+        1.7097085275231816
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 367,
+      "attempt_global": 367,
+      "index": 168,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.3926054291008552,
+        -1.4823279840629247,
+        0.49505652785818277,
+        -2.7466203605550326,
+        0.5115140532241093,
+        1.3122076168784276,
+        1.8870387255440362
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 374,
+      "attempt_global": 374,
+      "index": 169,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.1670262465392662,
+        -1.3800403357981232,
+        0.4083350177809685,
+        -2.7671545290859294,
+        0.40555716937915476,
+        1.4170660421380175,
+        2.0698885881498565
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 381,
+      "attempt_global": 381,
+      "index": 170,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.9417760218897215,
+        -1.3038995949413648,
+        0.29625977137723347,
+        -2.782692919882501,
+        0.28634497910247514,
+        1.493607482892769,
+        2.2506707221159177
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 336,
+      "attempt_global": 336,
+      "index": 171,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.5511638477481248,
+        -1.5085941431671865,
+        -0.510382768261896,
+        -2.7413594710363873,
+        -0.5330975759492806,
+        1.2848450584638509,
+        -2.8423307140304397
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 338,
+      "attempt_global": 338,
+      "index": 172,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.6149648973009287,
+        -1.5426916717443024,
+        -0.5270357047300211,
+        -2.7345138442587746,
+        -0.5585728464224197,
+        1.2490076839398283,
+        -2.790287049999073
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 341,
+      "attempt_global": 341,
+      "index": 173,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.7065708977632578,
+        -1.5937494007488542,
+        -0.5459179542578295,
+        -2.7241952930900113,
+        -0.5920771516708042,
+        1.1946426661928018,
+        -2.7154817577562294
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 343,
+      "attempt_global": 343,
+      "index": 174,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.7679374727718853,
+        -1.628970395828421,
+        -0.5551610430650286,
+        -2.7169790134299765,
+        -0.6123605178770716,
+        1.1565695428298395,
+        -2.6653179643154385
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 346,
+      "attempt_global": 346,
+      "index": 175,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.8622052816651643,
+        -1.6839924279263019,
+        -0.5639165563340529,
+        -2.7055001683381525,
+        -0.6398921634861863,
+        1.0960684773519502,
+        -2.588219795310078
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 348,
+      "attempt_global": 348,
+      "index": 176,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.9246901476480277,
+        -1.7206535977066237,
+        -0.5660806147296232,
+        -2.6976546026929396,
+        -0.6556138231490518,
+        1.0549593927530476,
+        -2.537087830988203
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 353,
+      "attempt_global": 353,
+      "index": 177,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.825920945335635,
+        -1.7257328431568608,
+        0.566149937417057,
+        -2.696556310625311,
+        0.6576278308209897,
+        1.049212611248698,
+        1.5330742780276931
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 356,
+      "attempt_global": 356,
+      "index": 178,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.7322286306321806,
+        -1.6707850299872233,
+        0.5624295821666715,
+        -2.708288021130573,
+        0.6337290117864738,
+        1.1107168875756521,
+        1.6097397284125488
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 358,
+      "attempt_global": 358,
+      "index": 179,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -1.6708076281314888,
+        -1.6349453656311785,
+        0.5564408545720119,
+        -2.715742145708601,
+        0.6155894456335508,
+        1.1500583774832762,
+        1.659972082296633
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.3044148270541758,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 382,
+      "attempt_global": 382,
+      "index": 180,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.9961290244061903,
+        -1.762319206338695,
+        -0.565036904924197,
+        -2.68849244303828,
+        -0.6709994306084308,
+        1.0073528692451896,
+        -1.824695934390307
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 383,
+      "attempt_global": 383,
+      "index": 181,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.3336154812354582,
+        -1.2391081366199477,
+        -0.07032260665067785,
+        -2.796245319594226,
+        -0.06648896853736498,
+        1.5579282988018806,
+        -2.8973
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 384,
+      "attempt_global": 384,
+      "index": 182,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.29894982837293405,
+        -1.2415730664290128,
+        -0.09180850381581568,
+        -2.795688011831435,
+        -0.08687598046690356,
+        1.5554655531851234,
+        -2.8699332334403618
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 385,
+      "attempt_global": 385,
+      "index": 183,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.2665630930473618,
+        -1.244508815307046,
+        -0.1117747337874337,
+        -2.7950645218656796,
+        -0.10587091013064748,
+        1.5525611876840582,
+        -2.844358817680985
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 386,
+      "attempt_global": 386,
+      "index": 184,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.23619250805058478,
+        -1.2478117146394108,
+        -0.13038929917885617,
+        -2.794372920085751,
+        -0.12364222994783183,
+        1.5493010336262747,
+        -2.820351865266679
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 387,
+      "attempt_global": 387,
+      "index": 185,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.20609372281156516,
+        -1.2515720906389458,
+        -0.14870056481363877,
+        -2.7935804227497125,
+        -0.14118235694036518,
+        1.545582710212306,
+        -2.7965462353823094
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 388,
+      "attempt_global": 388,
+      "index": 186,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.1737027318203292,
+        -1.2561865756696295,
+        -0.16824576915039913,
+        -2.792609309239703,
+        -0.159985862200362,
+        1.5410168816539853,
+        -2.7709053662543157
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 389,
+      "attempt_global": 389,
+      "index": 187,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.14159295929063045,
+        -1.2613458987565072,
+        -0.1874371545207445,
+        -2.7915250173693407,
+        -0.17854121142918294,
+        1.535903456586155,
+        -2.745476074902494
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 390,
+      "attempt_global": 390,
+      "index": 188,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.1106296500705947,
+        -1.2668603143053367,
+        -0.20574197219855386,
+        -2.7903741841963963,
+        -0.196350701531914,
+        1.5304441991934878,
+        -2.7209155529552524
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 391,
+      "attempt_global": 391,
+      "index": 189,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.07787433848983027,
+        -1.2732794436659334,
+        -0.224856041024814,
+        -2.789030751194044,
+        -0.21505796979130606,
+        1.5240726403241522,
+        -2.694917284047326
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 392,
+      "attempt_global": 392,
+      "index": 190,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.046408827877354696,
+        -1.2800068141590606,
+        -0.24297005468834015,
+        -2.7876249642153876,
+        -0.23291676199280037,
+        1.5173871727353991,
+        -2.669908799383177
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 393,
+      "attempt_global": 393,
+      "index": 191,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        -0.013792138708089716,
+        -1.2875749269857182,
+        -0.2614533420564779,
+        -2.78605369495328,
+        -0.2512865105023682,
+        1.5098621235258958,
+        -2.6439550333743482
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 394,
+      "attempt_global": 394,
+      "index": 192,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.020089258320410787,
+        -1.2960725897938186,
+        -0.2803310536714754,
+        -2.7843016787957438,
+        -0.2702185958398082,
+        1.5014095061706298,
+        -2.616944144411832
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 395,
+      "attempt_global": 395,
+      "index": 193,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.05300414424767604,
+        -1.304935291714352,
+        -0.29832047038251447,
+        -2.782471719794622,
+        -0.2884436900316825,
+        1.4925704479099422,
+        -2.590682150687635
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 396,
+      "attempt_global": 396,
+      "index": 194,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.08379838800504462,
+        -1.3137842592661142,
+        -0.31480120019073626,
+        -2.780653665550001,
+        -0.3053165573699297,
+        1.4837312172843402,
+        -2.566080324042914
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 397,
+      "attempt_global": 397,
+      "index": 195,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.11618369325366545,
+        -1.3236507687134353,
+        -0.3317594243100674,
+        -2.7786342902062042,
+        -0.3228797424983824,
+        1.4738624522472692,
+        -2.5401563470768873
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 398,
+      "attempt_global": 398,
+      "index": 196,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.14938302179189683,
+        -1.3343406936113427,
+        -0.3487319851853156,
+        -2.7764380396442245,
+        -0.340686941799435,
+        1.4631422821597861,
+        -2.513553282246188
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 399,
+      "attempt_global": 399,
+      "index": 197,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.18368091894368538,
+        -1.3460346730739077,
+        -0.36577547968415786,
+        -2.7740528663655333,
+        -0.3588286436667109,
+        1.4513926852117172,
+        -2.4860199201500723
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 400,
+      "attempt_global": 400,
+      "index": 198,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.21676570968771722,
+        -1.3579189157127336,
+        -0.3817323944042375,
+        -2.771632084841628,
+        -0.3760821631768775,
+        1.4394191392349445,
+        -2.4594161291584413
+      ],
+      "pass_index": 0,
+      "pass_seed": 3406182,
+      "sampled_yaw_rad": 2.958293082397705,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    },
+    {
+      "attempt": 1,
+      "attempt_global": 401,
+      "index": 199,
+      "joint_names": [
+        "panda_joint1",
+        "panda_joint2",
+        "panda_joint3",
+        "panda_joint4",
+        "panda_joint5",
+        "panda_joint6",
+        "panda_joint7"
+      ],
+      "joint_positions": [
+        0.99633591501582,
+        -1.7624418824733399,
+        -0.565029819539987,
+        -2.688466654665154,
+        -0.6710399643342273,
+        1.007210502781335,
+        1.8215020358074887
+      ],
+      "pass_index": 1,
+      "pass_seed": 3506182,
+      "sampled_yaw_rad": 0.32113334647447284,
+      "target_point": {
+        "x": 0.18036031060296567,
+        "y": -0.08629733200847196,
+        "z": 0.49397168845798184
+      },
+      "tip_link": "panda_link8"
+    }
+  ]
+}

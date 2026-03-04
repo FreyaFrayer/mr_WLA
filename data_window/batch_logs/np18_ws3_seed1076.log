@@ -1,0 +1,116 @@
+[INFO] [launch]: All log files can be found below /root/.ros/log/2026-02-27-17-25-01-843340-gz-ins-776946647854405-302206
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [ik_window-1]: process started with pid [302209]
+[ik_window-1] [INFO] [1772184302.436510256] [moveit_144408631.moveit.py.cpp_initializer]: Initialize rclcpp
+[ik_window-1] [INFO] [1772184302.436555016] [moveit_144408631.moveit.py.cpp_initializer]: Initialize node parameters
+[ik_window-1] [INFO] [1772184302.436565256] [moveit_144408631.moveit.py.cpp_initializer]: Initialize node and executor
+[ik_window-1] [INFO] [1772184302.442973636] [moveit_144408631.moveit.py.cpp_initializer]: Spin separate thread
+[ik_window-1] [INFO] [1772184302.444256010] [moveit_144408631.moveit.ros.rdf_loader]: Loaded robot model in 0.00108811 seconds
+[ik_window-1] [INFO] [1772184302.444282040] [moveit_144408631.moveit.core.robot_model]: Loading robot model 'panda'...
+[ik_window-1] [INFO] [1772184302.451046299] [moveit_144408631.moveit.kinematics.kdl_kinematics_plugin]: Joint weights for group 'panda_arm': 1 1 1 1 1 1 1
+[ik_window-1] [INFO] [1772184302.473375725] [moveit_144408631.moveit.ros.planning_scene_monitor]: Publishing maintained planning scene on 'monitored_planning_scene'
+[ik_window-1] [INFO] [1772184302.473505625] [moveit_144408631.moveit.ros.moveit_cpp]: Listening to 'joint_states' for joint states
+[ik_window-1] [INFO] [1772184302.474533940] [moveit_144408631.moveit.ros.current_state_monitor]: Listening to joint states on topic 'joint_states'
+[ik_window-1] [INFO] [1772184302.474825949] [moveit_144408631.moveit.ros.planning_scene_monitor]: Listening to '/attached_collision_object' for attached collision objects
+[ik_window-1] [INFO] [1772184302.474838459] [moveit_144408631.moveit.ros.planning_scene_monitor]: Stopping existing planning scene publisher.
+[ik_window-1] [INFO] [1772184302.474934328] [moveit_144408631.moveit.ros.planning_scene_monitor]: Stopped publishing maintained planning scene.
+[ik_window-1] [INFO] [1772184302.475171627] [moveit_144408631.moveit.ros.planning_scene_monitor]: Publishing maintained planning scene on 'monitored_planning_scene'
+[ik_window-1] [INFO] [1772184302.475258157] [moveit_144408631.moveit.ros.planning_scene_monitor]: Starting planning scene monitor
+[ik_window-1] [INFO] [1772184302.475900644] [moveit_144408631.moveit.ros.planning_scene_monitor]: Listening to '/planning_scene'
+[ik_window-1] [INFO] [1772184302.475914964] [moveit_144408631.moveit.ros.planning_scene_monitor]: Starting world geometry update monitor for collision objects, attached objects, octomap updates.
+[ik_window-1] [INFO] [1772184302.476193763] [moveit_144408631.moveit.ros.planning_scene_monitor]: Listening to 'collision_object'
+[ik_window-1] [INFO] [1772184302.476441251] [moveit_144408631.moveit.ros.planning_scene_monitor]: Listening to 'planning_scene_world' for planning scene world geometry
+[ik_window-1] [WARN] [1772184302.476571951] [moveit_144408631.moveit.ros.occupancy_map_monitor]: Resolution not specified for Octomap. Assuming resolution = 0.1 instead
+[ik_window-1] [ERROR] [1772184302.476586001] [moveit_144408631.moveit.ros.occupancy_map_monitor]: No 3D sensor plugin(s) defined for octomap updates
+[ik_window-1] [INFO] [1772184302.489232322] [moveit_144408631.moveit.ros.planning_pipeline]: Successfully loaded planner 'OMPL'
+[ik_window-1] [INFO] [1772184302.490189917] [panda_ik_window]: Try loading adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[ik_window-1] [INFO] [1772184302.490910734] [panda_ik_window]: Loaded adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[ik_window-1] [INFO] [1772184302.490922074] [panda_ik_window]: Try loading adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[ik_window-1] [INFO] [1772184302.491019574] [panda_ik_window]: Loaded adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[ik_window-1] [INFO] [1772184302.491026474] [panda_ik_window]: Try loading adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[ik_window-1] [INFO] [1772184302.491048023] [panda_ik_window]: Loaded adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[ik_window-1] [INFO] [1772184302.491052873] [panda_ik_window]: Try loading adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[ik_window-1] [INFO] [1772184302.491063893] [panda_ik_window]: Loaded adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[ik_window-1] [INFO] [1772184302.491916149] [panda_ik_window]: Try loading adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[ik_window-1] [INFO] [1772184302.493452812] [panda_ik_window]: Loaded adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[ik_window-1] [INFO] [1772184302.493463632] [panda_ik_window]: Try loading adapter 'default_planning_response_adapters/ValidateSolution'
+[ik_window-1] [INFO] [1772184302.494867836] [panda_ik_window]: Loaded adapter 'default_planning_response_adapters/ValidateSolution'
+[ik_window-1] [INFO] [1772184302.494879896] [panda_ik_window]: Try loading adapter 'default_planning_response_adapters/DisplayMotionPath'
+[ik_window-1] [INFO] [1772184302.495241394] [panda_ik_window]: Loaded adapter 'default_planning_response_adapters/DisplayMotionPath'
+[ik_window-1] [FATAL] [1772184302.512433274] [moveit_144408631.moveit.ros.trajectory_execution_manager]: Exception while loading controller manager 'moveit_simple_controller_manager/MoveItSimpleControllerManager': According to the loaded plugin descriptions the class moveit_simple_controller_manager/MoveItSimpleControllerManager with base class type moveit_controller_manager::MoveItControllerManager does not exist. Declared types are 
+[ik_window-1] [ERROR] [1772184302.512492824] [moveit_144408631.moveit.ros.trajectory_execution_manager]: Failed to reload controllers: `controller_manager_` does not exist.
+[ik_window-1] [INFO] [1772184302.512934322] [moveit_144408631.moveit.ros.trajectory_execution_manager]: Trajectory execution is managing controllers
+[ik_window-1] [INFO] [1772184383.733028450] [moveit_144408631.moveit.ros.moveit_cpp]: Deleting MoveItCpp
+[ik_window-1] [INFO] [1772184383.739689600] [moveit_144408631.moveit.ros.planning_scene_monitor]: Stopped publishing maintained planning scene.
+[ik_window-1] [INFO] [1772184383.740841114] [moveit_144408631.moveit.ros.planning_scene_monitor]: Stopping world geometry monitor
+[ik_window-1] [INFO] [1772184383.741128093] [moveit_144408631.moveit.ros.planning_scene_monitor]: Stopping planning scene monitor
+[ik_window-1] Warning: class_loader.ClassLoader: SEVERE WARNING!!! Attempting to unload library while objects created by this loader exist in the heap! You should delete your objects before attempting to unload the library or destroying the ClassLoader. The library will NOT be unloaded.
+[ik_window-1]          at line 127 in /home/runner/conda-bld/bld/rattler-build_ros-jazzy-class-loader_1771183342/work/ros-jazzy-class-loader/src/work/src/class_loader.cpp
+[ik_window-1] [run] timestamp = 20260227_172502
+[ik_window-1] [run] data dir   = data_window/np18/ws3/seed1076/20260227_172502
+[ik_window-1] [run] GPU 是否被使用 = 是 (cuda, NVIDIA GeForce RTX 4090)
+[ik_window-1] [run] DP dtype        = float32
+[ik_window-1] [run] eval_workers    = 1
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p1 ...
+[ik_window-1] [select] p1: (-0.543, 0.474, 0.087) found 200/200 (trials_used=1) -> p1.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p2 ...
+[ik_window-1] [select] p2: (-0.047, 0.087, 0.848) found 200/200 (trials_used=1) -> p2.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p3 ...
+[ik_window-1] [select] p3: (0.133, 0.103, 0.215) found 200/200 (trials_used=1) -> p3.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p4 ...
+[ik_window-1] [select] p4: (0.533, -0.379, 0.140) found 200/200 (trials_used=1) -> p4.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p5 ...
+[ik_window-1] [select] p5: (0.240, -0.008, 0.824) found 200/200 (trials_used=1) -> p5.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p6 ...
+[ik_window-1] [select] p6: (0.642, 0.063, 0.608) found 200/200 (trials_used=1) -> p6.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p7 ...
+[ik_window-1] [select] p7: (-0.363, 0.205, 0.107) found 200/200 (trials_used=1) -> p7.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p8 ...
+[ik_window-1] [select] p8: (0.040, -0.168, 0.469) found 200/200 (trials_used=1) -> p8.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p9 ...
+[ik_window-1] [select] p9: (0.125, -0.074, 0.550) found 200/200 (trials_used=1) -> p9.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p10 ...
+[ik_window-1] [select] p10: (0.050, 0.189, 0.211) found 200/200 (trials_used=1) -> p10.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p11 ...
+[ik_window-1] [select] p11: (0.156, -0.143, 0.231) found 200/200 (trials_used=1) -> p11.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p12 ...
+[ik_window-1] [select] p12: (-0.052, 0.121, 0.482) found 200/200 (trials_used=1) -> p12.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p13 ...
+[ik_window-1] [select] p13: (-0.169, 0.328, 0.305) found 200/200 (trials_used=1) -> p13.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p14 ...
+[ik_window-1] [select] p14: (0.178, 0.134, 0.324) found 200/200 (trials_used=1) -> p14.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p15 ...
+[ik_window-1] [select] p15: (-0.200, 0.251, 0.068) found 200/200 (trials_used=1) -> p15.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p16 ...
+[ik_window-1] [select] p16: (-0.477, -0.125, 0.102) found 200/200 (trials_used=2) -> p16.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p17 ...
+[ik_window-1] [select] p17: (-0.439, -0.386, 0.652) found 200/200 (trials_used=1) -> p17.json
+[ik_window-1] 
+[ik_window-1] [select] searching a solvable target for p18 ...
+[ik_window-1] [select] p18: (0.109, 0.113, 0.460) found 200/200 (trials_used=1) -> p18.json
+[ik_window-1] [eval] precomputed Q tensors on cuda (dtype=torch.float32) for 18 layer(s)
+[ik_window-1] 
+[ik_window-1] [eval] window policy (ws=3/18) ...
+[ik_window-1] 
+[ik_window-1] [eval] greedy baseline (ws=1/18) ...
+[ik_window-1] [eval] summary -> summary.json
+[ik_window-1] 
+[ik_window-1] [done] bye.
+[INFO] [ik_window-1]: process has finished cleanly [pid 302209]
