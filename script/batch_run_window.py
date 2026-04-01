@@ -256,7 +256,7 @@ def _run_ros2_launch(
     window_size: int,
     path_pattern: str,
     data_root: Path,
-    # time_model: str,
+    time_model: str,
     # device: str,
     # dp_block_size: int,
     log_file: Optional[Path],
@@ -274,7 +274,7 @@ def _run_ros2_launch(
         f"path_pattern:={path_pattern}",
         f"data_root:={str(data_root)}",
         # GPU/DP args (as requested)
-        # f"time_model:={time_model}",
+        f"time_model:={time_model}",
         # f"device:={device}",
         # f"dp_block_size:={int(dp_block_size)}",
     ]
@@ -481,7 +481,7 @@ def main() -> int:
                 window_size=int(ws),
                 path_pattern=path_pattern,
                 data_root=run_data_root,
-                # time_model=time_model,
+                time_model=time_model,
                 # device=device,
                 # dp_block_size=dp_block_size,
                 log_file=log_file,
