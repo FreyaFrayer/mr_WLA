@@ -51,6 +51,19 @@ Evaluate multiple window sizes in one run:
 ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=8 seed:=7 window_size:="1,3,8"
 ```
 
+Reuse an existing candidate set (`targets.json` + `p*.json`) for fair time-model comparison:
+
+```bash
+# 1) Generate candidates once (example: totg run)
+ros2 launch panda_ik_window ik_benchmark.launch.py \
+  num_points:=8 seed:=7 window_size:="1,3,8" time_model:=totg data_root:=data_window/shared_seed7
+
+# 2) Re-evaluate with another time model on exactly the same candidates
+ros2 launch panda_ik_window ik_benchmark.launch.py \
+  num_points:=8 seed:=7 window_size:="1,3,8" time_model:=trapezoid \
+  reuse_candidates_dir:=data_window/shared_seed7/<timestamp>
+```
+
 Sweep all (ws=1..n), old behavior:
 
 ```bash

@@ -20,6 +20,7 @@ def generate_launch_description() -> LaunchDescription:
     group = LaunchConfiguration("group")
     named_start = LaunchConfiguration("named_start")
     data_root = LaunchConfiguration("data_root")
+    reuse_candidates_dir = LaunchConfiguration("reuse_candidates_dir")
 
     # IK sampling
     num_solutions = LaunchConfiguration("num_solutions")
@@ -82,6 +83,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("group", default_value="panda_arm"),
             DeclareLaunchArgument("named_start", default_value="random"),
             DeclareLaunchArgument("data_root", default_value="data_window"),
+            DeclareLaunchArgument("reuse_candidates_dir", default_value=""),
             DeclareLaunchArgument("num_solutions", default_value="200"),
             DeclareLaunchArgument("num_spaces", default_value="10"),
             DeclareLaunchArgument("max_attempts", default_value="400"),
@@ -124,6 +126,8 @@ def generate_launch_description() -> LaunchDescription:
                     named_start,
                     "--data-root",
                     data_root,
+                    "--reuse-candidates-dir",
+                    reuse_candidates_dir,
                     "--window-size",
                     window_size,
                     "--device",
