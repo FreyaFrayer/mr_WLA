@@ -1,0 +1,96 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Greedy Robot1
+        - /Global Robot1
+      Splitter Ratio: 0.5
+    Tree Height: 765
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.7
+      Cell Size: 0.5
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 160
+      Enabled: true
+      Name: Grid
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: false
+      Frame Timeout: 15.0
+      Frames:
+        All Enabled: false
+      Marker Scale: 0.2
+      Name: TF
+    - Class: rviz_default_plugins/RobotModel
+      Description Topic: /greedy/robot_description
+      Enabled: true
+      Name: Greedy Robot
+      TF Prefix: greedy_
+      Update Interval: 0.0
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+    - Class: rviz_default_plugins/RobotModel
+      Description Topic: /global/robot_description
+      Enabled: true
+      Name: Global Robot
+      TF Prefix: global_
+      Update Interval: 0.0
+      Visual Enabled: true
+      Collision Enabled: false
+      Alpha: 1.0
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Topic: /ik_benchmark/markers
+      Name: Path Points
+      Namespaces:
+        ik_benchmark_labels: true
+        ik_benchmark_lines: true
+        ik_benchmark_points: true
+      Queue Size: 10
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: world
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+    - Class: rviz_default_plugins/SetInitialPose
+    - Class: rviz_default_plugins/SetGoal
+  Transformation:
+    Current:
+      Class: rviz_default_plugins/TF
+  Value: true
+Views:
+  Current:
+    Class: rviz_default_plugins/Orbit
+    Distance: 2.5
+    Focal Point:
+      X: 0.0
+      Y: 0.0
+      Z: 0.4
+    Pitch: 0.5
+    Yaw: 1.5
+    Name: Current View
+Window Geometry:
+  Height: 900
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Width: 1400
+  X: 50
+  Y: 50

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>panda_ik_solutions_viz</name>
+  <version>0.1.0</version>
+  <description>Visualize multiple IK solutions for the Franka Panda in RViz by publishing a DisplayTrajectory containing all IK solutions.</description>
+
+  <maintainer email="TODO@example.com">TODO</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
+  <exec_depend>moveit_msgs</exec_depend>
+
+  <exec_depend>moveit_configs_utils</exec_depend>
+  <exec_depend>moveit_ros_move_group</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+
+  <exec_depend>moveit_resources_panda_moveit_config</exec_depend>
+
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

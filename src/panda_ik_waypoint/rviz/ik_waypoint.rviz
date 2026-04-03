@@ -1,0 +1,87 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Robot1
+      Splitter Ratio: 0.5
+    Tree Height: 760
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.7
+      Cell Size: 0.5
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 160
+      Enabled: true
+      Name: Grid
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: false
+      Frame Timeout: 15.0
+      Frames:
+        All Enabled: false
+      Marker Scale: 0.2
+      Name: TF
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description Topic: /waypoint/robot_description
+      Enabled: true
+      Name: Robot
+      TF Prefix: waypoint_
+      Update Interval: 0
+      Visual Enabled: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: Path Markers
+      Namespaces:
+        ik_waypoint_labels: true
+        ik_waypoint_line: true
+        ik_waypoint_points: true
+        ik_waypoint_title: true
+      Queue Size: 10
+      Topic: /ik_waypoint/markers
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: world
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+    - Class: rviz_default_plugins/SetInitialPose
+    - Class: rviz_default_plugins/SetGoal
+  Transformation:
+    Current:
+      Class: rviz_default_plugins/TF
+  Value: true
+Views:
+  Current:
+    Class: rviz_default_plugins/Orbit
+    Distance: 2.6
+    Focal Point:
+      X: 0
+      Y: 0
+      Z: 0.4
+    Name: Current View
+    Pitch: 0.55
+    Yaw: 1.45
+Window Geometry:
+  Height: 900
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Width: 1400
+  X: 50
+  Y: 50

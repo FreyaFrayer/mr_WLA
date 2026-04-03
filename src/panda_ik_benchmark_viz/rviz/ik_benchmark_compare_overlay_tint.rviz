@@ -1,0 +1,98 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Greedy Robot Mesh1
+        - /Global Robot Mesh1
+      Splitter Ratio: 0.5
+    Tree Height: 765
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.7
+      Cell Size: 0.5
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 160
+      Enabled: true
+      Name: Grid
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: false
+      Frame Timeout: 15.0
+      Frames:
+        All Enabled: false
+      Marker Scale: 0.2
+      Name: TF
+    # RobotModel cannot reliably override embedded Collada materials (.dae).
+    # We instead display the two tinted robots via per-link mesh MarkerArray topics.
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Topic: /greedy/mesh_markers
+      Name: Greedy Robot Mesh
+      Namespaces:
+        greedy_robot: true
+      Queue Size: 10
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Topic: /global/mesh_markers
+      Name: Global Robot Mesh
+      Namespaces:
+        global_robot: true
+      Queue Size: 10
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Topic: /ik_benchmark/markers
+      Name: Path Points
+      Namespaces:
+        ik_benchmark_titles: true
+        ik_benchmark_p0: true
+        ik_benchmark_p0_label: true
+        ik_benchmark_points: true
+        ik_benchmark_point_labels: true
+        ik_benchmark_lines_global: true
+        ik_benchmark_lines_greedy: true
+      Queue Size: 10
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: world
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+    - Class: rviz_default_plugins/SetInitialPose
+    - Class: rviz_default_plugins/SetGoal
+  Transformation:
+    Current:
+      Class: rviz_default_plugins/TF
+  Value: true
+Views:
+  Current:
+    Class: rviz_default_plugins/Orbit
+    Distance: 2.5
+    Focal Point:
+      X: 0.0
+      Y: 0.0
+      Z: 0.4
+    Pitch: 0.55
+    Yaw: 1.6
+    Name: Current View
+Window Geometry:
+  Height: 900
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Width: 1400
+  X: 50
+  Y: 50
