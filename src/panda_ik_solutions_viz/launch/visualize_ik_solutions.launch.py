@@ -71,6 +71,7 @@ def generate_launch_description() -> LaunchDescription:
             robot_name="moveit_resources_panda",
             package_name="moveit_resources_panda_moveit_config",
         )
+        .planning_pipelines(pipelines=["pilz_industrial_motion_planner"])
         .moveit_cpp(file_path=moveit_cpp_yaml)
         .to_moveit_configs()
     )

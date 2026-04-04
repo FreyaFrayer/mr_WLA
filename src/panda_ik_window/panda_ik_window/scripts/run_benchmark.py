@@ -292,7 +292,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument(
         "--time-model",
         type=str,
-        default="totg",
+        default="trapezoid",
         choices=["auto", "totg", "trapezoid"],
         help="Segment time model: auto=prefer MoveIt TOTG, fallback to trapezoid; "
         "totg=force MoveIt TOTG; trapezoid=analytic rest-to-rest model.",

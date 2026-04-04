@@ -71,6 +71,7 @@ def generate_launch_description() -> LaunchDescription:
             robot_name="moveit_resources_panda",
             package_name="moveit_resources_panda_moveit_config",
         )
+        .planning_pipelines(pipelines=["pilz_industrial_motion_planner"])
         .moveit_cpp(file_path=moveit_cpp_yaml)
         .to_moveit_configs()
     )
@@ -99,7 +100,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("ws_z_min", default_value="0.05"),
             DeclareLaunchArgument("ws_z_max", default_value="0.85"),
             DeclareLaunchArgument("min_sep", default_value="0.06"),
-            DeclareLaunchArgument("time_model", default_value="totg"),
+            DeclareLaunchArgument("time_model", default_value="trapezoid"),
             DeclareLaunchArgument("window_size", default_value="all"),
             DeclareLaunchArgument("device", default_value="cuda"),
             DeclareLaunchArgument("dp_block_size", default_value="256"),

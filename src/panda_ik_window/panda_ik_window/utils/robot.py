@@ -14,8 +14,8 @@ from moveit.planning import MoveItPy
 class JointLimit:
     min_position: float
     max_position: float
-    max_velocity: float  # rad/s (fallback to a sane default if unknown)
-    max_acceleration: float  # rad/s^2 (fallback to a sane default if unknown)
+    max_velocity: float  # rad/s
+    max_acceleration: float  # rad/s^2
 
     def clamp(self, v: float) -> float:
         return float(min(max(v, self.min_position), self.max_position))
@@ -60,39 +60,30 @@ def _infer_tip_link_from_jmg(jmg) -> str:
 
 def _extract_joint_limits_from_jmg(
     jmg,
-    *,
-    default_vel: float = 2.0,
-    default_acc: float = 4.0,
 ) -> List[JointLimit]:
     """
     Try to read joint limits from MoveItPy bindings.
 
     We rely on `jmg.active_joint_model_bounds` (similar to the provided IK sampler).
-    If velocity/acceleration fields are missing, fall back to `default_vel` / `default_acc`.
     """
     limits: List[JointLimit] = []
-    bounds = None
+    joint_names = list(getattr(jmg, "active_joint_model_names", getattr(jmg, "joint_model_names", [])))
+
     try:
         bounds = list(jmg.active_joint_model_bounds)
-    except Exception:
-        bounds = None
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to read joint bounds from MoveIt (active_joint_model_bounds): {e}"
+        ) from e
 
-    if bounds is None or len(bounds) == 0:
-        # fallback: use wide bounds
-        # Panda 7DoF typical range is within [-2.9, 2.9], but we avoid hardcoding if possible.
-        # Still, we keep it safe.
-        for _ in range(int(len(getattr(jmg, "joint_model_names", [])))):
-            limits.append(
-                JointLimit(
-                    min_position=-math.pi,
-                    max_position=math.pi,
-                    max_velocity=float(default_vel),
-                    max_acceleration=float(default_acc),
-                )
-            )
-        return limits
+    if len(bounds) == 0:
+        raise RuntimeError(
+            "MoveIt returned empty active_joint_model_bounds; cannot continue without joint limits."
+        )
 
-    for b in bounds:
+    for i, b in enumerate(bounds):
+        joint_name = str(joint_names[i]) if i < len(joint_names) else f"joint[{i}]"
+
         # Position bounds
         lo = -math.pi
         hi = math.pi
@@ -103,8 +94,8 @@ def _extract_joint_limits_from_jmg(
         except Exception:
             pass
 
-        # Velocity limit (if available)
-        vmax = float(default_vel)
+        # Velocity limit (required)
+        vmax = None
         for attr in ("max_velocity", "max_velocity_", "velocity", "max_velocity_limit"):
             if hasattr(b, attr):
                 try:
@@ -114,9 +105,13 @@ def _extract_joint_limits_from_jmg(
                         break
                 except Exception:
                     pass
+        if vmax is None:
+            raise RuntimeError(
+                f"Failed to read a valid max_velocity from MoveIt bounds for {joint_name}."
+            )
 
-        # Acceleration limit (if available)
-        amax = float(default_acc)
+        # Acceleration limit (required)
+        amax = None
         for attr in ("max_acceleration", "max_acceleration_", "acceleration", "max_acceleration_limit"):
             if hasattr(b, attr):
                 try:
@@ -126,8 +121,19 @@ def _extract_joint_limits_from_jmg(
                         break
                 except Exception:
                     pass
+        if amax is None:
+            raise RuntimeError(
+                f"Failed to read a valid max_acceleration from MoveIt bounds for {joint_name}."
+            )
 
-        limits.append(JointLimit(min_position=lo, max_position=hi, max_velocity=vmax, max_acceleration=amax))
+        limits.append(
+            JointLimit(
+                min_position=lo,
+                max_position=hi,
+                max_velocity=float(vmax),
+                max_acceleration=float(amax),
+            )
+        )
 
     return limits
 
@@ -137,8 +143,6 @@ def load_robot_context(
     node_name: str = "panda_ik_window",
     group: str = "panda_arm",
     tip_link: str = "",
-    default_vel: float = 2.0,
-    default_acc: float = 4.0,
 ) -> RobotContext:
     """
     Create MoveItPy instance, load robot model, and extract group metadata.
@@ -161,7 +165,7 @@ def load_robot_context(
     if not tip_link.strip():
         tip_link = _infer_tip_link_from_jmg(jmg)
 
-    joint_limits = _extract_joint_limits_from_jmg(jmg, default_vel=float(default_vel), default_acc=float(default_acc))
+    joint_limits = _extract_joint_limits_from_jmg(jmg)
     if len(joint_limits) != len(joint_names):
         # last resort: align lengths
         m = min(len(joint_limits), len(joint_names))
