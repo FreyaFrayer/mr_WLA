@@ -43,7 +43,7 @@ ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=8 seed:=7 window_
 `path_pattern` choices:
 - `trend`: direction-consistent trend
 - `switching`: multi-directional switching
-- `random`: directionally unstructured (default)
+- `random`: unconstrained random (may be trend/switching/unstructured, default)
 
 Evaluate multiple window sizes in one run:
 

@@ -116,10 +116,9 @@ def _match_path_pattern(
         return is_switching
 
     if pattern == "random":
-        # Keep early points unconstrained; enforce class after at least 3 increments.
-        if H < 3:
-            return True
-        return (not is_trend) and (not is_switching)
+        # Random mode is intentionally unconstrained by direction class.
+        # It may look trend-like, switching-like, or unstructured.
+        return True
 
     raise ValueError(f"Unsupported path pattern: {pattern!r}")
 

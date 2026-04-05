@@ -16,6 +16,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSlider>
+#include <QDoubleSpinBox>
 
 namespace panda_try_rviz
 {
@@ -42,6 +43,7 @@ private:
 
   std::array<QSlider *, 7> sliders_{};
   std::array<QLabel *, 7> value_labels_{};
+  std::array<QDoubleSpinBox *, 7> angle_inputs_{};
 
   std::array<double, 7> joint_positions_rad_{};
 
@@ -58,6 +60,7 @@ private:
   static double jointMaxDeg(int idx);
 
   void onJointSliderChanged(int idx, int slider_value);
+  void onJointInputChanged(int idx, double input_deg);
   void onSavePointClicked();
   void onCollisionStatus(const std_msgs::msg::Bool & msg);
 

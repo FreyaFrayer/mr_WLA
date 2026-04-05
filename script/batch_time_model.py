@@ -219,11 +219,32 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
         if not isinstance(segs, list):
             segs = []
         selected_solution_ids: List[str] = []
+        selected_solution_details: List[Dict] = []
+        selected_by_point: Dict[str, Dict] = {}
         for seg in segs:
             if isinstance(seg, dict):
+                point = str(seg.get("to", "")).strip()
                 sid = str(seg.get("solution_id", "")).strip()
                 if sid:
                     selected_solution_ids.append(sid)
+                q_raw = seg.get("joint_positions", [])
+                q_rad: List[float] = []
+                if isinstance(q_raw, list):
+                    for v in q_raw:
+                        fv = _safe_float(v)
+                        if _is_finite(fv):
+                            q_rad.append(float(fv))
+                q_deg = [float(v * 180.0 / math.pi) for v in q_rad]
+
+                detail = {
+                    "point": point,
+                    "selected_solution_id": sid,
+                    "joint_positions_rad": q_rad,
+                    "joint_positions_deg": q_deg,
+                }
+                selected_solution_details.append(detail)
+                if point:
+                    selected_by_point[point] = detail
 
         recs = selection_by_ws.get(key, None)
         if not isinstance(recs, list):
@@ -235,11 +256,20 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
         for rec in recs:
             if not isinstance(rec, dict):
                 continue
+            point = str(rec.get("point", ""))
+            sid = str(rec.get("selected_solution_id", ""))
+            sel_detail = selected_by_point.get(point, {})
+            q_rad = sel_detail.get("joint_positions_rad", [])
+            q_deg = sel_detail.get("joint_positions_deg", [])
+            if not sid:
+                sid = str(sel_detail.get("selected_solution_id", ""))
             recs_out.append(
                 {
-                    "point": str(rec.get("point", "")),
-                    "selected_solution_id": str(rec.get("selected_solution_id", "")),
+                    "point": point,
+                    "selected_solution_id": sid,
                     "selection_elapsed_s": _safe_float(rec.get("selection_elapsed_s", math.nan)),
+                    "joint_positions_rad": list(q_rad) if isinstance(q_rad, list) else [],
+                    "joint_positions_deg": list(q_deg) if isinstance(q_deg, list) else [],
                 }
             )
 
@@ -250,6 +280,7 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
         return {
             "total_time_s": float(total_time_s),
             "selected_solution_ids": selected_solution_ids,
+            "selected_solution_details": selected_solution_details,
             "selection_by_point": recs_out,
             "selection_total_s": float(selection_total_s),
         }
@@ -280,6 +311,13 @@ def _fmt_num(v: float, prec: int = 6) -> str:
     if _is_finite(float(v)):
         return f"{float(v):.{prec}f}"
     return "nan"
+
+
+def _fmt_vec(xs: Sequence[float], *, prec: int = 3) -> str:
+    vals: List[str] = []
+    for x in xs:
+        vals.append(_fmt_num(_safe_float(x), prec=prec))
+    return "[" + ", ".join(vals) + "]"
 
 
 def _write_summary_txt(
@@ -341,16 +379,40 @@ def _write_summary_txt(
                     f"  selection(ws={ws}) total_s={_fmt_num(float(ws_data['selection_total_s']))}, "
                     f"selected_solution_ids={ws_data.get('selected_solution_ids', [])}"
                 )
+                details = ws_data.get("selected_solution_details", [])
+                if isinstance(details, list) and details:
+                    lines.append("  selected_solution_joint_angles:")
+                    for d in details:
+                        if not isinstance(d, dict):
+                            continue
+                        p = str(d.get("point", ""))
+                        sid = str(d.get("selected_solution_id", ""))
+                        q_rad = d.get("joint_positions_rad", [])
+                        q_deg = d.get("joint_positions_deg", [])
+                        if not isinstance(q_rad, list):
+                            q_rad = []
+                        if not isinstance(q_deg, list):
+                            q_deg = []
+                        lines.append(
+                            "    "
+                            f"{p}: {sid}, "
+                            f"q_rad={_fmt_vec(q_rad, prec=6)}, "
+                            f"q_deg={_fmt_vec(q_deg, prec=3)}"
+                        )
                 recs = ws_data.get("selection_by_point", [])
                 if not isinstance(recs, list) or len(recs) == 0:
                     lines.append("    (no per-point selection timing records)")
                     continue
                 for rec in recs:
+                    q_deg = rec.get("joint_positions_deg", [])
+                    if not isinstance(q_deg, list):
+                        q_deg = []
                     lines.append(
                         "    "
                         f"{str(rec.get('point', ''))}: "
                         f"{str(rec.get('selected_solution_id', ''))}, "
-                        f"elapsed={_fmt_num(_safe_float(rec.get('selection_elapsed_s', math.nan)))}s"
+                        f"elapsed={_fmt_num(_safe_float(rec.get('selection_elapsed_s', math.nan)))}s, "
+                        f"q_deg={_fmt_vec(q_deg, prec=3)}"
                     )
 
         # Optional side-by-side aid

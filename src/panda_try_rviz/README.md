@@ -3,6 +3,7 @@
 Interactive Panda RViz package with:
 
 - 7 sliders to control `panda_joint1..7`
+- direct degree input box for each joint slider
 - one button to save current EE position
 - saved EE positions shown as yellow points
 - self-collision status + contact markers shown in RViz

@@ -9,6 +9,19 @@ import numpy as np
 from moveit.core.robot_state import RobotState
 from moveit.planning import MoveItPy
 
+# Fallback limits for Panda arm joints.
+# Used only when a MoveIt Python binding does not expose velocity/acceleration
+# in active_joint_model_bounds.
+_PANDA_FALLBACK_DYNAMICS = {
+    "panda_joint1": (2.1750, 3.75),
+    "panda_joint2": (2.1750, 1.875),
+    "panda_joint3": (2.1750, 2.5),
+    "panda_joint4": (2.1750, 3.125),
+    "panda_joint5": (2.6100, 3.75),
+    "panda_joint6": (2.6100, 5.0),
+    "panda_joint7": (2.6100, 5.0),
+}
+
 
 @dataclass(frozen=True)
 class JointLimit:
@@ -37,10 +50,6 @@ class RobotContext:
     @property
     def velocity_limits(self) -> np.ndarray:
         return np.array([jl.max_velocity for jl in self.joint_limits], dtype=float)
-
-    @property
-    def acceleration_limits(self) -> np.ndarray:
-        return np.array([jl.max_acceleration for jl in self.joint_limits], dtype=float)
 
     @property
     def acceleration_limits(self) -> np.ndarray:
@@ -81,6 +90,8 @@ def _extract_joint_limits_from_jmg(
             "MoveIt returned empty active_joint_model_bounds; cannot continue without joint limits."
         )
 
+    used_fallback = False
+
     for i, b in enumerate(bounds):
         joint_name = str(joint_names[i]) if i < len(joint_names) else f"joint[{i}]"
 
@@ -106,9 +117,14 @@ def _extract_joint_limits_from_jmg(
                 except Exception:
                     pass
         if vmax is None:
-            raise RuntimeError(
-                f"Failed to read a valid max_velocity from MoveIt bounds for {joint_name}."
-            )
+            fb = _PANDA_FALLBACK_DYNAMICS.get(joint_name)
+            if fb is not None and float(fb[0]) > 1e-6:
+                vmax = float(fb[0])
+                used_fallback = True
+            else:
+                raise RuntimeError(
+                    f"Failed to read a valid max_velocity from MoveIt bounds for {joint_name}."
+                )
 
         # Acceleration limit (required)
         amax = None
@@ -122,9 +138,14 @@ def _extract_joint_limits_from_jmg(
                 except Exception:
                     pass
         if amax is None:
-            raise RuntimeError(
-                f"Failed to read a valid max_acceleration from MoveIt bounds for {joint_name}."
-            )
+            fb = _PANDA_FALLBACK_DYNAMICS.get(joint_name)
+            if fb is not None and float(fb[1]) > 1e-6:
+                amax = float(fb[1])
+                used_fallback = True
+            else:
+                raise RuntimeError(
+                    f"Failed to read a valid max_acceleration from MoveIt bounds for {joint_name}."
+                )
 
         limits.append(
             JointLimit(
@@ -133,6 +154,12 @@ def _extract_joint_limits_from_jmg(
                 max_velocity=float(vmax),
                 max_acceleration=float(amax),
             )
+        )
+
+    if used_fallback:
+        print(
+            "[robot] WARN: MoveIt bounds missed velocity/acceleration limits for some joints; "
+            "used Panda fallback dynamics for missing values."
         )
 
     return limits

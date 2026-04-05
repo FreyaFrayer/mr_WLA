@@ -6,6 +6,7 @@
 
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QSignalBlocker>
 #include <QVBoxLayout>
 
 #include <rviz_common/display_context.hpp>
@@ -65,18 +66,36 @@ PandaTryControlPanel::PandaTryControlPanel(QWidget * parent)
     value_label->setMinimumWidth(70);
     value_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
+    auto * angle_input = new QDoubleSpinBox();
+    angle_input->setDecimals(1);
+    angle_input->setRange(jointMinDeg(i), jointMaxDeg(i));
+    angle_input->setSingleStep(0.1);
+    angle_input->setSuffix(" deg");
+    angle_input->setKeyboardTracking(false);
+    angle_input->setAlignment(Qt::AlignRight);
+    angle_input->setMinimumWidth(95);
+    angle_input->setValue(static_cast<double>(slider->value()) / 10.0);
+
     sliders_[static_cast<size_t>(i)] = slider;
     value_labels_[static_cast<size_t>(i)] = value_label;
+    angle_inputs_[static_cast<size_t>(i)] = angle_input;
     joint_positions_rad_[static_cast<size_t>(i)] = (static_cast<double>(slider->value()) / 10.0) * kDegToRad;
 
     refreshJointValueLabel(i);
 
     grid->addWidget(slider, i, 1);
     grid->addWidget(value_label, i, 2);
+    grid->addWidget(angle_input, i, 3);
 
     QObject::connect(slider, &QSlider::valueChanged, this, [this, i](int value) {
       onJointSliderChanged(i, value);
     });
+
+    QObject::connect(
+      angle_input, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+      [this, i](double value_deg) {
+        onJointInputChanged(i, value_deg);
+      });
   }
 
   root->addLayout(grid);
@@ -141,8 +160,44 @@ void PandaTryControlPanel::onJointSliderChanged(int idx, int slider_value)
     return;
   }
 
-  const double deg = static_cast<double>(slider_value) / 10.0;
-  joint_positions_rad_[static_cast<size_t>(idx)] = clampDeg(deg, idx) * kDegToRad;
+  const double deg = clampDeg(static_cast<double>(slider_value) / 10.0, idx);
+  auto * angle_input = angle_inputs_[static_cast<size_t>(idx)];
+  if (angle_input) {
+    QSignalBlocker blocker(angle_input);
+    angle_input->setValue(deg);
+  }
+
+  joint_positions_rad_[static_cast<size_t>(idx)] = deg * kDegToRad;
+  refreshJointValueLabel(idx);
+  publishCurrentJointState();
+}
+
+void PandaTryControlPanel::onJointInputChanged(int idx, double input_deg)
+{
+  if (idx < 0 || idx >= 7) {
+    return;
+  }
+
+  const double clamped_deg = clampDeg(input_deg, idx);
+  const int slider_value = static_cast<int>(std::round(clamped_deg * 10.0));
+  auto * slider = sliders_[static_cast<size_t>(idx)];
+  if (!slider) {
+    return;
+  }
+
+  {
+    QSignalBlocker blocker(slider);
+    slider->setValue(slider_value);
+  }
+
+  const double snapped_deg = static_cast<double>(slider->value()) / 10.0;
+  auto * angle_input = angle_inputs_[static_cast<size_t>(idx)];
+  if (angle_input) {
+    QSignalBlocker blocker(angle_input);
+    angle_input->setValue(snapped_deg);
+  }
+
+  joint_positions_rad_[static_cast<size_t>(idx)] = snapped_deg * kDegToRad;
   refreshJointValueLabel(idx);
   publishCurrentJointState();
 }

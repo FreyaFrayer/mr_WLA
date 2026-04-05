@@ -6,6 +6,10 @@
 - **Multi-directional switching pattern**（多方向跳变型）
 - **Directionally unstructured pattern / Random pattern**（随机型）
 
+实现备注（2026-04-06）：
+- 在当前代码的点采样阶段，`path_pattern=random` 表示**不施加方向模式约束**。
+- 因此 `random` 采样结果可能呈现 trend、switching 或 unstructured 中任一种几何形态。
+
 ---
 
 ## 1. 统一数学表示
