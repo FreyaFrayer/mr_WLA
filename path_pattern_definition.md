@@ -6,6 +6,10 @@
 - **Multi-directional switching pattern**（多方向跳变型）
 - **Directionally unstructured pattern / Random pattern**（随机型）
 
+扩展模式（工程实现）：
+
+- **Trend-plus pattern**（趋势增强防死角型）：以 trend 为主，但会在每 3~5 个 trend 点后插入一个 switch 点；若最近选点落入危险区（靠近工作空间边缘），则强制下一点转向并回到安全区。
+
 实现备注（2026-04-06）：
 - 在当前代码的点采样阶段，`path_pattern=random` 表示**不施加方向模式约束**。
 - 因此 `random` 采样结果可能呈现 trend、switching 或 unstructured 中任一种几何形态。

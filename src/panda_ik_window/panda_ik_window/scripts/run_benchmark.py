@@ -240,7 +240,8 @@ def _parse_args() -> argparse.Namespace:
         help=(
             "Path pattern for sampled target sequence: "
             "trend=direction-consistent, switching=multi-directional jump, "
-            "random=no directional class constraint."
+            "random=no directional class constraint, "
+            "trend_plus=trend with periodic anti-stall switch and danger-zone return-to-safe switch."
         ),
     )
 

@@ -44,6 +44,7 @@ ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=8 seed:=7 window_
 - `trend`: direction-consistent trend
 - `switching`: multi-directional switching
 - `random`: unconstrained random (may be trend/switching/unstructured, default)
+- `trend_plus`: trend-dominant with periodic switch (every 3~5 trend points) and danger-zone turn-back to safe zone
 
 Evaluate multiple window sizes in one run:
 

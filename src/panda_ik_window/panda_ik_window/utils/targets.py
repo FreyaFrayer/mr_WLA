@@ -10,13 +10,16 @@ from moveit.core.robot_state import RobotState
 from ..types import TargetPoint
 from .robot import RobotContext
 
-PATH_PATTERN_CHOICES = ("trend", "switching", "random")
+PATH_PATTERN_CHOICES = ("trend", "switching", "random", "trend_plus")
 
 _TREND_COHERENCE_MIN = 0.50
 _TREND_AVG_TURN_MAX_RAD = float(np.deg2rad(130.0))
 _TREND_CONSEC_COS_MIN = -0.7
 _SWITCH_TURN_MIN_RAD = float(np.deg2rad(150.0))
 _SWITCH_CONSEC_COS_MAX = -0.8
+_TREND_PLUS_MIN_STREAK = 3
+_TREND_PLUS_STREAK_VARIANTS = 3  # 3/4/5 trend points then force a switch
+_TREND_PLUS_SAFE_MARGIN_RATIO = 0.20
 _EPS = 1e-9
 
 
@@ -30,6 +33,9 @@ def normalize_path_pattern(raw: str) -> str:
         "trend": "trend",
         "direction-consistent-trend": "trend",
         "direction-consistent": "trend",
+        "trend-plus": "trend_plus",
+        "trend_plus": "trend_plus",
+        "trendplus": "trend_plus",
         "switching": "switching",
         "multi-directional-switching": "switching",
         "multi-directional": "switching",
@@ -88,12 +94,63 @@ def _is_switching_pattern(H: int, theta_max: float, dots: np.ndarray) -> bool:
     return bool(dots.size > 0 and np.any(dots <= _SWITCH_CONSEC_COS_MAX))
 
 
+def _is_switch_turn(prev2: TargetPoint, prev1: TargetPoint, curr: TargetPoint) -> bool:
+    """Classify a local turn using the same thresholds as switching mode."""
+    v1 = np.asarray(
+        [float(prev1.x - prev2.x), float(prev1.y - prev2.y), float(prev1.z - prev2.z)],
+        dtype=float,
+    )
+    v2 = np.asarray(
+        [float(curr.x - prev1.x), float(curr.y - prev1.y), float(curr.z - prev1.z)],
+        dtype=float,
+    )
+    n1 = float(np.linalg.norm(v1))
+    n2 = float(np.linalg.norm(v2))
+    if n1 <= _EPS or n2 <= _EPS:
+        return False
+
+    cosv = float(np.dot(v1, v2) / (n1 * n2))
+    cosv = float(np.clip(cosv, -1.0, 1.0))
+    turn = float(np.arccos(cosv))
+    return bool(turn >= _SWITCH_TURN_MIN_RAD or cosv <= _SWITCH_CONSEC_COS_MAX)
+
+
+def _count_switches_and_trend_streak(points: Sequence[TargetPoint]) -> tuple[int, int]:
+    """Replay accepted points and return (num_switch_points, trailing_trend_points)."""
+    if len(points) <= 1:
+        return 0, 0
+
+    switch_count = 0
+    trend_streak = 0
+    for idx in range(1, len(points)):
+        # First accepted point has no turn context; treat as trend.
+        if idx < 2:
+            is_switch = False
+        else:
+            is_switch = _is_switch_turn(points[idx - 2], points[idx - 1], points[idx])
+
+        if is_switch:
+            switch_count += 1
+            trend_streak = 0
+        else:
+            trend_streak += 1
+
+    return int(switch_count), int(trend_streak)
+
+
+def _trend_plus_streak_cap(switch_count: int) -> int:
+    """Cycle 3 -> 4 -> 5 trend points between switch points."""
+    phase = int(max(0, switch_count)) % int(_TREND_PLUS_STREAK_VARIANTS)
+    return int(_TREND_PLUS_MIN_STREAK + phase)
+
+
 def _match_path_pattern(
     *,
     pattern: str,
     path_anchor: Optional[TargetPoint],
     existing_points: Sequence[TargetPoint],
     candidate: TargetPoint,
+    workspace: Optional["WorkspaceBounds"] = None,
 ) -> bool:
     points: List[TargetPoint] = []
     if path_anchor is not None:
@@ -120,6 +177,42 @@ def _match_path_pattern(
         # It may look trend-like, switching-like, or unstructured.
         return True
 
+    if pattern == "trend_plus":
+        ws = workspace if workspace is not None else WorkspaceBounds()
+        history: List[TargetPoint] = []
+        if path_anchor is not None:
+            history.append(path_anchor)
+        history.extend(existing_points)
+
+        switch_count, trend_streak = _count_switches_and_trend_streak(history)
+        streak_cap = _trend_plus_streak_cap(switch_count)
+
+        has_turn_context = len(history) >= 2
+        candidate_is_switch = (
+            _is_switch_turn(history[-2], history[-1], candidate) if has_turn_context else False
+        )
+
+        last_selected = history[-1] if len(history) > 0 else None
+        last_in_danger = (last_selected is not None and ws.in_danger_zone(last_selected))
+
+        # Trigger conditions:
+        # 1) periodic anti-stall switch after 3~5 trend points;
+        # 2) if previous selected point is already in danger zone, force turning back.
+        force_switch = bool(trend_streak >= streak_cap or last_in_danger)
+        if not force_switch:
+            if H < 2:
+                return True
+            return is_trend
+
+        if last_in_danger and not ws.in_safe_zone(candidate):
+            return False
+
+        if not has_turn_context:
+            # For very early points (insufficient turn context), only keep the safety rule.
+            return True
+
+        return candidate_is_switch
+
     raise ValueError(f"Unsupported path pattern: {pattern!r}")
 
 
@@ -140,6 +233,33 @@ class WorkspaceBounds:
         return (self.x_min <= p.x <= self.x_max and
                 self.y_min <= p.y <= self.y_max and
                 self.z_min <= p.z <= self.z_max)
+
+    def _safe_bounds(self, margin_ratio: float = _TREND_PLUS_SAFE_MARGIN_RATIO) -> tuple[float, float, float, float, float, float]:
+        ratio = float(max(0.0, min(0.45, margin_ratio)))
+        sx = float(self.x_max - self.x_min)
+        sy = float(self.y_max - self.y_min)
+        sz = float(self.z_max - self.z_min)
+        mx = ratio * sx
+        my = ratio * sy
+        mz = ratio * sz
+        return (
+            float(self.x_min + mx), float(self.x_max - mx),
+            float(self.y_min + my), float(self.y_max - my),
+            float(self.z_min + mz), float(self.z_max - mz),
+        )
+
+    def in_safe_zone(self, p: TargetPoint, *, margin_ratio: float = _TREND_PLUS_SAFE_MARGIN_RATIO) -> bool:
+        if not self.contains(p):
+            return False
+        x_min, x_max, y_min, y_max, z_min, z_max = self._safe_bounds(margin_ratio=margin_ratio)
+        return (x_min <= p.x <= x_max and
+                y_min <= p.y <= y_max and
+                z_min <= p.z <= z_max)
+
+    def in_danger_zone(self, p: TargetPoint, *, margin_ratio: float = _TREND_PLUS_SAFE_MARGIN_RATIO) -> bool:
+        if not self.contains(p):
+            return False
+        return not self.in_safe_zone(p, margin_ratio=margin_ratio)
 
 
 def _euclidean(a: TargetPoint, b: TargetPoint) -> float:
@@ -174,7 +294,7 @@ def sample_one_reachable_point_fk(
     -----
     - We use a NumPy RNG to keep reproducibility stable.
     - Minimal separation to previously accepted points is enforced.
-    - `path_pattern` follows Path Pattern Definition: trend / switching / random.
+    - `path_pattern` supports: trend / switching / random / trend_plus.
     """
     workspace = workspace or WorkspaceBounds()
     pattern = normalize_path_pattern(path_pattern)
@@ -216,6 +336,7 @@ def sample_one_reachable_point_fk(
             path_anchor=path_anchor,
             existing_points=existing_points,
             candidate=p,
+            workspace=workspace,
         ):
             continue
 
