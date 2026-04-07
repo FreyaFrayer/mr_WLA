@@ -13,6 +13,7 @@ import numpy as np
 
 from ..ik.sampler_space import sample_ik_solutions, save_ik_json
 from ..ik.robust_sampler import sample_ik_solutions_multi_pass
+from ..planning.origin_time import compute_origin_path_time
 from ..planning.search import window_path_receding_horizon
 from ..planning.time_metric import SegmentTimeModel, TotgSettings
 from ..types import IKSolution, TargetPoint
@@ -622,6 +623,31 @@ def main() -> None:
             targets=targets,
         )
 
+        origin_start_state = make_robot_state_from_joints(ctx, start_q)
+        origin_tip_pose = origin_start_state.get_pose(ctx.tip_link)
+        origin_tip_quat = (
+            float(origin_tip_pose.orientation.x),
+            float(origin_tip_pose.orientation.y),
+            float(origin_tip_pose.orientation.z),
+            float(origin_tip_pose.orientation.w),
+        )
+
+        print("\n[eval] origin path baseline (planner point-to-point, no IK selection) ...")
+        origin_result = compute_origin_path_time(
+            ctx=ctx,
+            start_q=start_q,
+            targets=targets,
+            tip_quat_xyzw=origin_tip_quat,
+        )
+        if str(origin_result.status) == "ok":
+            print(
+                f"[eval] origin total_time_s = {float(origin_result.total_time_s):.6f} "
+                f"(segments={len(origin_result.segments)}, "
+                f"planning_elapsed_total_s={float(origin_result.planning_elapsed_total_s):.6f})"
+            )
+        else:
+            print(f"[eval] WARN origin planning failed: {origin_result.note}")
+
         def _make_time_model() -> SegmentTimeModel:
             return SegmentTimeModel(
                 model=str(args.time_model),
@@ -675,6 +701,53 @@ def main() -> None:
                         "selected_solution_index_1based": int(rec["selected_solution_index_1based"]),
                         "selected_solution_id": str(rec["selected_solution_id"]),
                         "selection_elapsed_s": float(rec["selection_elapsed_s"]),
+                    }
+                )
+            return out
+
+        def _origin_segments_payload() -> List[Dict]:
+            out: List[Dict] = []
+            for seg in list(origin_result.segments):
+                out.append(
+                    {
+                        "segment_index_1based": int(seg.seg_idx_1based),
+                        "from": str(seg.from_label),
+                        "to": str(seg.to_label),
+                        "trajectory_time_s": float(seg.trajectory_time_s),
+                        "planning_elapsed_s": float(seg.planning_elapsed_s),
+                        "start_joint_positions": [float(v) for v in seg.start_joint_positions],
+                        "end_joint_positions": [float(v) for v in seg.end_joint_positions],
+                    }
+                )
+            return out
+
+        def _origin_joint_positions_by_point_payload() -> List[Dict]:
+            point_to_joint_positions: Dict[str, List[float]] = {
+                "p0": [float(v) for v in start_q],
+            }
+
+            for seg in list(origin_result.segments):
+                point_to_joint_positions[str(seg.from_label)] = [float(v) for v in seg.start_joint_positions]
+                point_to_joint_positions[str(seg.to_label)] = [float(v) for v in seg.end_joint_positions]
+
+            def _point_sort_key(label: str) -> tuple[int, str]:
+                if label.startswith("p"):
+                    idx_txt = label[1:]
+                    if idx_txt.isdigit():
+                        return int(idx_txt), str(label)
+                return 10**9, str(label)
+
+            out: List[Dict] = []
+            for point_label in sorted(point_to_joint_positions.keys(), key=_point_sort_key):
+                joint_positions = [float(v) for v in point_to_joint_positions[point_label]]
+                out.append(
+                    {
+                        "point": str(point_label),
+                        "joint_positions": joint_positions,
+                        "joint_positions_by_name": {
+                            str(joint_name): float(joint_pos)
+                            for joint_name, joint_pos in zip(ctx.joint_names, joint_positions)
+                        },
                     }
                 )
             return out
@@ -812,7 +885,7 @@ def main() -> None:
 
         summary = {
             "format": "panda_ik_window_summary",
-            "format_version": 2,
+            "format_version": 3,
             "meta": {
                 "timestamp": str(data_paths.timestamp),
                 "seed": int(args.seed),
@@ -830,7 +903,7 @@ def main() -> None:
                     "totg_failures": int(time_model.info.totg_failures),
                     "note": str(time_model.info.note),
                 },
-                # New in v2:
+                # New in v3:
                 "window_size_input": str(window_size_input),
                 "window_size_requested": window_size_requested_field,
                 "window_size": window_size_effective_field,
@@ -853,6 +926,25 @@ def main() -> None:
             "ik_files": {f"p{i}": data_paths.ik_json_for_point(i).name for i in range(1, n + 1)},
             "ik_sampling_meta": {f"p{i}": dict(meta) for i, meta in enumerate(ik_meta_by_point, start=1)},
             "ik_solve_timing": dict(ik_solve_timing_payload),
+            "origin": {
+                "status": str(origin_result.status),
+                "method": str(origin_result.method),
+                "planner_id": str(origin_result.planner_id),
+                "planning_frame": str(origin_result.planning_frame),
+                "joint_names": [str(name) for name in ctx.joint_names],
+                "joint_positions_by_point": _origin_joint_positions_by_point_payload(),
+                "segment_times_s": [float(seg.trajectory_time_s) for seg in origin_result.segments],
+                "cumulative_times_s": [
+                    float(v)
+                    for v in np.cumsum(
+                        np.asarray([float(seg.trajectory_time_s) for seg in origin_result.segments], dtype=float)
+                    )
+                ],
+                "segments": _origin_segments_payload(),
+                "total_time_s": float(origin_result.total_time_s),
+                "planning_elapsed_total_s": float(origin_result.planning_elapsed_total_s),
+                "note": str(origin_result.note),
+            },
             "window": {
                 # Echo the user input (int or list[int]) for convenience.
                 "window_size": window_size_effective_field,
