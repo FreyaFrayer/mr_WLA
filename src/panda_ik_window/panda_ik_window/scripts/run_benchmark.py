@@ -666,10 +666,99 @@ def main() -> None:
                 ),
             )
 
+        def _make_totg_time_model_strict() -> SegmentTimeModel:
+            return SegmentTimeModel(
+                model="totg",
+                max_vel_rad_s=ctx.velocity_limits,
+                max_acc_rad_s2=ctx.acceleration_limits,
+                moveit_py=ctx.moveit_py,
+                robot_model=ctx.robot_model,
+                group=ctx.group,
+                joint_names=ctx.joint_names,
+                totg_settings=TotgSettings(
+                    vel_scale=float(args.totg_vel_scale),
+                    acc_scale=float(args.totg_acc_scale),
+                    path_tolerance=float(args.totg_path_tolerance),
+                    resample_dt=float(args.totg_resample_dt),
+                    min_angle_change=float(args.totg_min_angle_change),
+                ),
+            )
+
+        def _time_model_info_payload(time_model_obj: SegmentTimeModel) -> Dict:
+            info = time_model_obj.info
+            return {
+                "requested": str(info.requested),
+                "effective": str(info.effective),
+                "totg_available": bool(info.totg_available),
+                "totg_failures": int(info.totg_failures),
+                "note": str(info.note),
+            }
+
+        def _replay_selected_path_with_totg(res) -> Dict:
+            try:
+                replay_time_model = _make_totg_time_model_strict()
+            except Exception as e:
+                return {
+                    "status": "unavailable",
+                    "time_model": {
+                        "requested": "totg",
+                        "effective": "trapezoid",
+                        "totg_available": False,
+                        "totg_failures": 0,
+                        "note": str(e),
+                    },
+                    "segment_times_s": [],
+                    "cumulative_times_s": [],
+                    "segments": [],
+                    "total_time_s": 0.0,
+                    "note": f"TOTG replay unavailable: {e}",
+                }
+
+            current_q = [float(v) for v in start_q]
+            segment_times: List[float] = []
+            segments: List[Dict] = []
+            for seg in res.segments:
+                next_q = [float(v) for v in seg.best_solution.joint_positions]
+                dt = float(replay_time_model.segment_time_s(current_q, next_q))
+                segment_times.append(float(dt))
+                segments.append(
+                    {
+                        "from": str(seg.from_label),
+                        "to": str(seg.to_label),
+                        "time_s": float(dt),
+                        "solution_index_0based": int(seg.best_solution.index),
+                        "solution_index_1based": int(seg.best_solution.index) + 1,
+                        "solution_id": f"p{seg.seg_idx_1based}_{int(seg.best_solution.index)+1}",
+                        "attempt": int(seg.best_solution.attempt),
+                        "joint_positions": [float(v) for v in seg.best_solution.joint_positions],
+                    }
+                )
+                current_q = list(next_q)
+
+            cumulative = [float(v) for v in np.cumsum(np.asarray(segment_times, dtype=float))]
+            tm_info = _time_model_info_payload(replay_time_model)
+            totg_failures = int(tm_info["totg_failures"])
+            status = "ok" if totg_failures <= 0 else "ok_with_fallback"
+            note = (
+                "Replay timing of trapezoid-selected solutions using TOTG."
+                if status == "ok"
+                else "Replay timing used TOTG, but some segments fell back to trapezoid after TOTG runtime failure."
+            )
+            return {
+                "status": str(status),
+                "time_model": dict(tm_info),
+                "segment_times_s": [float(v) for v in segment_times],
+                "cumulative_times_s": cumulative,
+                "segments": segments,
+                "total_time_s": float(sum(segment_times)),
+                "note": str(note),
+            }
+
 
         # 6) Policy evaluation (window search)
         # For this package, one run evaluates ONLY the requested window_size(s).
         time_model = _make_time_model()
+        evaluate_trapezoid_solutions_with_totg = str(time_model.info.effective) == "trapezoid"
 
         def _path_segments_payload(res) -> List[Dict]:
             return [
@@ -818,6 +907,8 @@ def main() -> None:
         window_total_time_s_by_ws: Dict[str, float] = {}
         window_selection_timing_by_ws: Dict[str, List[Dict]] = {}
         window_selection_timing_total_s_by_ws: Dict[str, float] = {}
+        trapezoid_solutions_totg_results_by_ws: Dict[str, Dict] = {}
+        trapezoid_solutions_totg_total_time_s_by_ws: Dict[str, float] = {}
 
         for ws in ws_list:
             print(f"\n[eval] window policy (ws={ws}/{n}) ...")
@@ -856,6 +947,25 @@ def main() -> None:
                 },
             }
 
+            if evaluate_trapezoid_solutions_with_totg:
+                print("[eval] replay selected solutions with TOTG timing ...")
+                replay_payload = _replay_selected_path_with_totg(res)
+                replay_payload_with_ws = dict(replay_payload)
+                replay_payload_with_ws["window_size"] = int(ws)
+                trapezoid_solutions_totg_results_by_ws[str(ws)] = dict(replay_payload_with_ws)
+                trapezoid_solutions_totg_total_time_s_by_ws[str(ws)] = float(replay_payload["total_time_s"])
+                if str(replay_payload.get("status", "")) == "ok":
+                    print(
+                        "[eval] trapezoid_solutions_totg total_time_s = "
+                        f"{float(replay_payload['total_time_s']):.6f}"
+                    )
+                else:
+                    print(
+                        "[eval] WARN trapezoid_solutions_totg status="
+                        f"{str(replay_payload.get('status', 'unknown'))}: "
+                        f"{str(replay_payload.get('note', ''))}"
+                    )
+
         # Build unified summary.json (keeps the same overall structure as panda_ik_global_window,
         # but records results by window_size instead of separate greedy/global/window blocks).
         import json
@@ -885,7 +995,7 @@ def main() -> None:
 
         summary = {
             "format": "panda_ik_window_summary",
-            "format_version": 3,
+            "format_version": 4,
             "meta": {
                 "timestamp": str(data_paths.timestamp),
                 "seed": int(args.seed),
@@ -944,6 +1054,33 @@ def main() -> None:
                 "total_time_s": float(origin_result.total_time_s),
                 "planning_elapsed_total_s": float(origin_result.planning_elapsed_total_s),
                 "note": str(origin_result.note),
+            },
+            "trapezoid_solutions_totg": {
+                "enabled": bool(evaluate_trapezoid_solutions_with_totg),
+                "status": (
+                    "not_applicable"
+                    if not evaluate_trapezoid_solutions_with_totg
+                    else (
+                        "ok"
+                        if all(
+                            str(v.get("status", "")) == "ok"
+                            for v in trapezoid_solutions_totg_results_by_ws.values()
+                        )
+                        else "partial"
+                    )
+                ),
+                "note": (
+                    "Only generated when selected solutions are chosen by trapezoid timing."
+                    if not evaluate_trapezoid_solutions_with_totg
+                    else "Replay timing for trapezoid-selected solutions computed with TOTG."
+                ),
+                "total_time_s_by_ws": dict(trapezoid_solutions_totg_total_time_s_by_ws),
+                "results_by_ws": dict(trapezoid_solutions_totg_results_by_ws),
+                "results": [
+                    dict(trapezoid_solutions_totg_results_by_ws[str(ws)])
+                    for ws in ws_list
+                    if str(ws) in trapezoid_solutions_totg_results_by_ws
+                ],
             },
             "window": {
                 # Echo the user input (int or list[int]) for convenience.

@@ -94,3 +94,4 @@ python3 batch_ik_window.py --num-points 8 --seeds 7,8,9
 - `targets.json`: start `p0` joint positions + sampled Cartesian target points `p1..pN`
 - `p1.json`..`pN.json`: IK solutions for each target point
 - `summary.json`: unified report with window results (only evaluated ws), plus `origin` (direct planner point-to-point time through `p0->p1..pN`, no IK candidate selection). `origin.joint_positions_by_point` records per-point joint angles (`p0..pN`) for each axis.
+- `summary.json.trapezoid_solutions_totg`: when solutions are selected with trapezoid timing, replay the same selected path with TOTG timing and record per-`ws` segment/total time.

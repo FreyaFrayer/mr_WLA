@@ -3,6 +3,10 @@
 """
 Batch compare time models (totg vs trapezoid) for panda_ik_window.
 
+Outputs in summary-dir:
+  - *_summary.txt
+  - time.csv (per seed + ws>1: origin, greedy(ws=1), trapezoid(ws), trapezoid_solutions_totg(ws))
+
 Example:
   python3 script/batch_time_model.py \
     --num-points 3 \
@@ -13,6 +17,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import math
 import re
@@ -204,6 +209,31 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
     if not isinstance(selection_by_ws, dict):
         selection_by_ws = {}
 
+    origin = data.get("origin", {})
+    if not isinstance(origin, dict):
+        origin = {}
+    origin_total_time_s = _safe_float(origin.get("total_time_s", math.nan))
+
+    trapezoid_solutions_totg = data.get("trapezoid_solutions_totg", {})
+    if not isinstance(trapezoid_solutions_totg, dict):
+        trapezoid_solutions_totg = {}
+    trap_totg_total_by_ws_raw = trapezoid_solutions_totg.get("total_time_s_by_ws", {})
+    if not isinstance(trap_totg_total_by_ws_raw, dict):
+        trap_totg_total_by_ws_raw = {}
+    trap_totg_total_by_ws: Dict[str, float] = {}
+    for k, v in trap_totg_total_by_ws_raw.items():
+        key = str(k).strip()
+        if not key:
+            continue
+        trap_totg_total_by_ws[key] = _safe_float(v)
+
+    window_total_time_s_by_ws: Dict[str, float] = {}
+    for k, v in totals_map.items():
+        key = str(k).strip()
+        if not key:
+            continue
+        window_total_time_s_by_ws[key] = _safe_float(v)
+
     def _extract_ws(ws: int) -> Dict:
         key = str(int(ws))
         total_time_s = _safe_float(totals_map.get(key, math.nan))
@@ -298,6 +328,9 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
     return {
         "status": "ok",
         "summary_path": str(summary_json),
+        "origin_total_time_s": float(origin_total_time_s),
+        "window_total_time_s_by_ws": dict(window_total_time_s_by_ws),
+        "trapezoid_solutions_totg_total_time_s_by_ws": dict(trap_totg_total_by_ws),
         "ws": {
             str(int(ws_ref)): ws_ref_data,
             str(int(ws_cmp)): ws_cmp_data,
@@ -318,6 +351,82 @@ def _fmt_vec(xs: Sequence[float], *, prec: int = 3) -> str:
     for x in xs:
         vals.append(_fmt_num(_safe_float(x), prec=prec))
     return "[" + ", ".join(vals) + "]"
+
+
+def _fmt_csv_num(v: float) -> str:
+    if _is_finite(float(v)):
+        return f"{float(v):.12g}"
+    return "nan"
+
+
+def _write_time_csv(
+    *,
+    path: Path,
+    seeds: Sequence[int],
+    window_sizes: Sequence[int],
+    results: Dict[int, Dict[str, Dict]],
+) -> None:
+    ws_targets = [int(ws) for ws in window_sizes if int(ws) != 1]
+
+    with path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "seed",
+                "ws",
+                "origin_time_s",
+                "greedy_time_s",
+                "trapezoid_time_s",
+                "trapezoid_solutions_totg_time_s",
+            ]
+        )
+
+        for seed in seeds:
+            by_model = results.get(int(seed), {})
+            trap_item = by_model.get("trapezoid", {})
+            if not isinstance(trap_item, dict) or str(trap_item.get("status", "")) != "ok":
+                for ws in ws_targets:
+                    writer.writerow([int(seed), int(ws), "nan", "nan", "nan", "nan"])
+                continue
+
+            origin_time_s = _safe_float(trap_item.get("origin_total_time_s", math.nan))
+            window_totals = trap_item.get("window_total_time_s_by_ws", {})
+            if not isinstance(window_totals, dict):
+                window_totals = {}
+            trap_totg_totals = trap_item.get("trapezoid_solutions_totg_total_time_s_by_ws", {})
+            if not isinstance(trap_totg_totals, dict):
+                trap_totg_totals = {}
+            ws_payload = trap_item.get("ws", {})
+            if not isinstance(ws_payload, dict):
+                ws_payload = {}
+
+            greedy_time_s = _safe_float(window_totals.get("1", math.nan))
+            if not _is_finite(greedy_time_s):
+                ws1 = ws_payload.get("1", {})
+                if isinstance(ws1, dict):
+                    greedy_time_s = _safe_float(ws1.get("total_time_s", math.nan))
+
+            for ws in ws_targets:
+                key = str(int(ws))
+
+                trapezoid_time_s = _safe_float(window_totals.get(key, math.nan))
+                if not _is_finite(trapezoid_time_s):
+                    ws_item = ws_payload.get(key, {})
+                    if isinstance(ws_item, dict):
+                        trapezoid_time_s = _safe_float(ws_item.get("total_time_s", math.nan))
+
+                trap_sol_totg_time_s = _safe_float(trap_totg_totals.get(key, math.nan))
+
+                writer.writerow(
+                    [
+                        int(seed),
+                        int(ws),
+                        _fmt_csv_num(origin_time_s),
+                        _fmt_csv_num(greedy_time_s),
+                        _fmt_csv_num(trapezoid_time_s),
+                        _fmt_csv_num(trap_sol_totg_time_s),
+                    ]
+                )
 
 
 def _write_summary_txt(
@@ -637,7 +746,15 @@ def main() -> int:
         candidate_mode=str(args.candidate_mode),
         results=results,
     )
+    time_csv = summary_dir / "time.csv"
+    _write_time_csv(
+        path=time_csv,
+        seeds=seeds,
+        window_sizes=window_sizes,
+        results=results,
+    )
     print(f"\n[batch] summary written: {summary_txt}")
+    print(f"[batch] time csv written: {time_csv}")
     print("[batch] done.")
     return 0
 
