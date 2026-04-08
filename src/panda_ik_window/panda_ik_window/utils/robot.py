@@ -22,6 +22,18 @@ _PANDA_FALLBACK_DYNAMICS = {
     "panda_joint7": (2.6100, 5.0),
 }
 
+# Position limits for Panda arm joints (rad), used as a safety fallback when
+# bindings return mismatched/misordered bounds.
+_PANDA_FALLBACK_POSITION_BOUNDS = {
+    "panda_joint1": (-2.8973, 2.8973),
+    "panda_joint2": (-1.7628, 1.7628),
+    "panda_joint3": (-2.8973, 2.8973),
+    "panda_joint4": (-3.0718, -0.0698),
+    "panda_joint5": (-2.8973, 2.8973),
+    "panda_joint6": (-0.0175, 3.7525),
+    "panda_joint7": (-2.8973, 2.8973),
+}
+
 
 @dataclass(frozen=True)
 class JointLimit:
@@ -58,6 +70,44 @@ class RobotContext:
     @property
     def position_bounds(self) -> List[Tuple[float, float]]:
         return [(jl.min_position, jl.max_position) for jl in self.joint_limits]
+
+
+def _enforce_state_bounds(state: RobotState, *, robot_model: object, group: str) -> None:
+    """Best-effort call into MoveIt RobotState bounds enforcement.
+
+    MoveItPy method signatures vary across versions/bindings, so we probe a few.
+    """
+    jmg = None
+    try:
+        jmg = robot_model.get_joint_model_group(str(group))
+    except Exception:
+        jmg = None
+
+    for method_name in ("enforce_bounds", "enforceBounds"):
+        fn = getattr(state, method_name, None)
+        if fn is None:
+            continue
+
+        candidates = [
+            ((), {}),
+            ((str(group),), {}),
+            ((), {"group_name": str(group)}),
+            ((), {"joint_model_group": jmg}) if jmg is not None else None,
+            ((jmg,), {}) if jmg is not None else None,
+        ]
+        for candidate in candidates:
+            if candidate is None:
+                continue
+            args, kwargs = candidate
+            try:
+                out = fn(*args, **kwargs)
+                if out is False:
+                    continue
+                return
+            except TypeError:
+                continue
+            except Exception:
+                continue
 
 
 def _infer_tip_link_from_jmg(jmg) -> str:
@@ -225,10 +275,18 @@ def make_robot_state_from_joints(ctx: RobotContext, joint_positions: Sequence[fl
     # clamp to bounds (avoid invalid seeds)
     for i, jl in enumerate(ctx.joint_limits):
         q[i] = jl.clamp(q[i])
+        if i < len(ctx.joint_names):
+            name = str(ctx.joint_names[i])
+            pos_fallback = _PANDA_FALLBACK_POSITION_BOUNDS.get(name, None)
+            if pos_fallback is not None:
+                lo_fb, hi_fb = pos_fallback
+                q[i] = float(min(max(q[i], float(lo_fb)), float(hi_fb)))
 
     state = RobotState(ctx.robot_model)
     state.set_to_default_values()
     state.set_joint_group_positions(ctx.group, q)
+    state.update()
+    _enforce_state_bounds(state, robot_model=ctx.robot_model, group=ctx.group)
     state.update()
     return state
 

@@ -7,13 +7,13 @@ import shutil
 from functools import wraps
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Sequence, Tuple
 
 import numpy as np
 
 from ..ik.sampler_space import sample_ik_solutions, save_ik_json
 from ..ik.robust_sampler import sample_ik_solutions_multi_pass
-from ..planning.origin_time import compute_origin_path_time
+from ..planning.origin_time import compute_joint_target_path_time, compute_origin_path_time
 from ..planning.search import window_path_receding_horizon
 from ..planning.time_metric import SegmentTimeModel, TotgSettings
 from ..types import IKSolution, TargetPoint
@@ -45,18 +45,220 @@ def _timed_call(fn: Callable[..., Any]) -> Callable[..., tuple[Any, float]]:
     return _wrapped
 
 
+def _as_bool(v: Any) -> bool:
+    text = str(v).strip().lower()
+    return text in {"1", "true", "yes", "y", "on"}
+
+
+def _quat_multiply_xyzw(q1: Sequence[float], q2: Sequence[float]) -> tuple[float, float, float, float]:
+    x1, y1, z1, w1 = map(float, q1)
+    x2, y2, z2, w2 = map(float, q2)
+    return (
+        w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+        w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+        w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+    )
+
+
+def _quat_normalize_xyzw(q: Sequence[float]) -> tuple[float, float, float, float]:
+    x, y, z, w = map(float, q)
+    if not all(math.isfinite(v) for v in (x, y, z, w)):
+        return (0.0, 0.0, 0.0, 1.0)
+    n = math.sqrt(x * x + y * y + z * z + w * w)
+    if (not math.isfinite(n)) or n <= 1e-12:
+        return (0.0, 0.0, 0.0, 1.0)
+    return (x / n, y / n, z / n, w / n)
+
+
+def _quat_from_yaw_xyzw(yaw_rad: float) -> tuple[float, float, float, float]:
+    half = 0.5 * float(yaw_rad)
+    return (0.0, 0.0, math.sin(half), math.cos(half))
+
+
+def _downward_quat_xyzw(yaw_rad: float = 0.0) -> tuple[float, float, float, float]:
+    # Base "tool z axis points to world -Z": Rx(pi).
+    q_down = (1.0, 0.0, 0.0, 0.0)
+    q_yaw = _quat_from_yaw_xyzw(float(yaw_rad))
+    return _quat_normalize_xyzw(_quat_multiply_xyzw(q_yaw, q_down))
+
+
+def _target_pose_payload(name: str, p: TargetPoint) -> Dict[str, float | str]:
+    qx, qy, qz, qw = p.normalized_quat_xyzw()
+    return {
+        "name": str(name),
+        "x": float(p.x),
+        "y": float(p.y),
+        "z": float(p.z),
+        "qx": float(qx),
+        "qy": float(qy),
+        "qz": float(qz),
+        "qw": float(qw),
+    }
+
+
+def _extract_target_quat_xyzw(obj: Dict[str, Any]) -> Tuple[Tuple[float, float, float, float], bool]:
+    """Parse orientation from target JSON object.
+
+    Returns:
+      (quat_xyzw, missing_orientation)
+    """
+    try:
+        if all(k in obj for k in ("qx", "qy", "qz", "qw")):
+            raw = (float(obj["qx"]), float(obj["qy"]), float(obj["qz"]), float(obj["qw"]))
+            return _quat_normalize_xyzw(raw), False
+    except Exception:
+        pass
+
+    try:
+        quat_raw = obj.get("quat_xyzw", None)
+        if isinstance(quat_raw, list) and len(quat_raw) >= 4:
+            raw = (float(quat_raw[0]), float(quat_raw[1]), float(quat_raw[2]), float(quat_raw[3]))
+            return _quat_normalize_xyzw(raw), False
+    except Exception:
+        pass
+
+    try:
+        ori = obj.get("orientation", None)
+        if isinstance(ori, dict) and all(k in ori for k in ("x", "y", "z", "w")):
+            raw = (float(ori["x"]), float(ori["y"]), float(ori["z"]), float(ori["w"]))
+            return _quat_normalize_xyzw(raw), False
+    except Exception:
+        pass
+
+    return (0.0, 0.0, 0.0, 1.0), True
+
+
+def _project_start_state_to_down_orientation(
+    *,
+    ctx,
+    start_state,
+    seed: int,
+    ik_timeout_s: float,
+    yaw_samples: int = 16,
+    random_seed_trials: int = 128,
+) -> Any:
+    """Keep the current tip position and solve IK with a downward tip orientation."""
+    from geometry_msgs.msg import Pose
+    from moveit.core.robot_state import RobotState
+
+    tip_pose = start_state.get_pose(ctx.tip_link)
+    target_x = float(tip_pose.position.x)
+    target_y = float(tip_pose.position.y)
+    target_z = float(tip_pose.position.z)
+    base_q = [float(v) for v in start_state.get_joint_group_positions(ctx.group)]
+
+    yaw_n = max(1, int(yaw_samples))
+    yaw_grid = [
+        (-math.pi) + (2.0 * math.pi) * (float(i) / float(yaw_n))
+        for i in range(yaw_n)
+    ]
+
+    def _make_pose(yaw_rad: float) -> Pose:
+        pose = Pose()
+        pose.position.x = float(target_x)
+        pose.position.y = float(target_y)
+        pose.position.z = float(target_z)
+        qx, qy, qz, qw = _downward_quat_xyzw(float(yaw_rad))
+        pose.orientation.x = float(qx)
+        pose.orientation.y = float(qy)
+        pose.orientation.z = float(qz)
+        pose.orientation.w = float(qw)
+        return pose
+
+    # First pass: deterministic yaw scan from the current start-q seed.
+    for yaw in yaw_grid:
+        st = RobotState(ctx.robot_model)
+        st.set_to_default_values()
+        st.set_joint_group_positions(ctx.group, base_q)
+        if st.set_from_ik(ctx.group, _make_pose(yaw), ctx.tip_link, float(ik_timeout_s)):
+            st.update()
+            return st
+
+    # Second pass: deterministic random joint seeds + yaw scan.
+    lows = np.array([jl.min_position for jl in ctx.joint_limits], dtype=float)
+    highs = np.array([jl.max_position for jl in ctx.joint_limits], dtype=float)
+    rng = np.random.default_rng(int(seed) + 9_999_991)
+    for _ in range(max(1, int(random_seed_trials))):
+        q_seed = rng.uniform(lows, highs).astype(float).tolist()
+        for yaw in yaw_grid:
+            st = RobotState(ctx.robot_model)
+            st.set_to_default_values()
+            st.set_joint_group_positions(ctx.group, q_seed)
+            if st.set_from_ik(ctx.group, _make_pose(yaw), ctx.tip_link, float(ik_timeout_s)):
+                st.update()
+                return st
+
+    raise RuntimeError(
+        "cannot solve p0-down IK at the current tip position "
+        f"(yaw_samples={yaw_n}, random_seed_trials={int(random_seed_trials)}, ik_timeout={float(ik_timeout_s):.3f}s)"
+    )
+
+
+def _sanitize_start_state_for_planning(
+    *,
+    ctx,
+    start_state,
+    seed: int,
+    ik_timeout_s: float,
+    max_trials: int = 128,
+) -> tuple[Any, bool, int]:
+    """Project current tip pose to a likely collision-free IK solution.
+
+    Some random seeded joint states can be self-colliding; pilz then rejects
+    them at CheckStartStateCollision. To keep p0 semantics (same tip pose) while
+    making planner-origin baseline robust, re-solve IK for the current pose with
+    deterministic seed retries.
+    """
+    from moveit.core.robot_state import RobotState
+
+    tip_pose = start_state.get_pose(ctx.tip_link)
+    pose_target = tip_pose
+    q_base = [float(v) for v in start_state.get_joint_group_positions(ctx.group)]
+
+    lows = np.array([jl.min_position for jl in ctx.joint_limits], dtype=float)
+    highs = np.array([jl.max_position for jl in ctx.joint_limits], dtype=float)
+    rng = np.random.default_rng(int(seed) + 8_812_887)
+
+    def _try_seed(q_seed: Sequence[float]) -> Any | None:
+        st = RobotState(ctx.robot_model)
+        st.set_to_default_values()
+        st.set_joint_group_positions(ctx.group, [float(v) for v in q_seed])
+        ok = st.set_from_ik(ctx.group, pose_target, ctx.tip_link, float(ik_timeout_s))
+        if not ok:
+            return None
+        st.update()
+        return st
+
+    st0 = _try_seed(q_base)
+    if st0 is not None:
+        return st0, False, 0
+
+    trials = max(1, int(max_trials))
+    for i in range(1, trials + 1):
+        q_seed = rng.uniform(lows, highs).astype(float).tolist()
+        st = _try_seed(q_seed)
+        if st is not None:
+            return st, True, i
+
+    return start_state, False, -1
+
+
 def _load_reused_candidates(
     *,
     reuse_dir: Path,
     num_points: int,
     requested: int,
     dof: int,
-) -> tuple[str, List[float], List[TargetPoint], List[List[IKSolution]], List[Dict], List[Dict]]:
+) -> tuple[str, List[float], List[TargetPoint], List[bool], List[List[IKSolution]], List[Dict], List[Dict]]:
     """Load targets + IK candidates from an existing run directory.
 
     Expected files in ``reuse_dir``:
     - ``targets.json``
     - ``p1.json`` ... ``pN.json``
+
+    Returns:
+      (start_label, start_q, targets, target_orientation_missing, solutions_by_point, ik_meta_by_point, ik_solve_timing_by_point)
     """
 
     root = Path(reuse_dir).expanduser().resolve()
@@ -98,12 +300,25 @@ def _load_reused_candidates(
         )
 
     targets: List[TargetPoint] = []
+    target_orientation_missing: List[bool] = []
     for i in range(1, int(num_points) + 1):
         obj = targets_raw[i - 1]
         if not isinstance(obj, dict):
             raise ValueError(f"targets[{i-1}] is not an object in {targets_path}")
         try:
-            targets.append(TargetPoint(x=float(obj["x"]), y=float(obj["y"]), z=float(obj["z"])))
+            q_xyzw, missing_orientation = _extract_target_quat_xyzw(obj)
+            targets.append(
+                TargetPoint(
+                    x=float(obj["x"]),
+                    y=float(obj["y"]),
+                    z=float(obj["z"]),
+                    qx=float(q_xyzw[0]),
+                    qy=float(q_xyzw[1]),
+                    qz=float(q_xyzw[2]),
+                    qw=float(q_xyzw[3]),
+                )
+            )
+            target_orientation_missing.append(bool(missing_orientation))
         except Exception as e:
             raise ValueError(f"Invalid target point targets[{i-1}] in {targets_path}: {e}") from e
 
@@ -197,6 +412,7 @@ def _load_reused_candidates(
         start_label,
         start_q,
         targets,
+        target_orientation_missing,
         solutions_by_point,
         ik_meta_by_point,
         ik_solve_timing_by_point,
@@ -227,6 +443,16 @@ def _parse_args() -> argparse.Namespace:
         help=(
             "Start joint positions, e.g. '0,-0.7,0,-2.3,0,1.6,0.8'. "
             "Empty -> named-start (or random if named-start=random)."
+        ),
+    )
+    p.add_argument(
+        "--p0-down",
+        nargs="?",
+        const="true",
+        default="false",
+        help=(
+            "Force p0 tip orientation to vertical-down (world -Z) by IK while keeping the current p0 tip position. "
+            "If no solution is found, the run fails with an explicit error."
         ),
     )
 
@@ -396,6 +622,7 @@ def main() -> None:
         topup_passes = int(args.topup_passes)
         precheck_attempts = int(args.precheck_attempts)
         precheck_spaces = int(args.precheck_num_spaces)
+        p0_down_enabled = _as_bool(args.p0_down)
         path_pattern = normalize_path_pattern(str(args.path_pattern))
         reuse_dir_raw = str(args.reuse_candidates_dir).strip()
         reuse_dir: Path | None = None
@@ -405,6 +632,7 @@ def main() -> None:
             candidate_source_mode = "reused"
 
         targets: List[TargetPoint] = []
+        target_orientation_missing: List[bool] = []
         solutions_by_point: List[List[IKSolution]] = []
         ik_meta_by_point: List[Dict] = []
         ik_solve_timing_by_point: List[Dict] = []
@@ -414,7 +642,15 @@ def main() -> None:
             print(f"[select] reuse-candidates-dir = {reuse_dir}")
             print(f"[select] path_pattern argument is ignored in reuse mode: {path_pattern}")
 
-            (start_label, start_q, targets, solutions_by_point, ik_meta_by_point, ik_solve_timing_by_point) = (
+            (
+                start_label,
+                start_q,
+                targets,
+                target_orientation_missing,
+                solutions_by_point,
+                ik_meta_by_point,
+                ik_solve_timing_by_point,
+            ) = (
                 _load_reused_candidates(
                     reuse_dir=reuse_dir,
                     num_points=int(n),
@@ -433,6 +669,57 @@ def main() -> None:
                 f"[select] reused candidates loaded: points={len(targets)}, "
                 f"solutions_per_point={requested}"
             )
+            if p0_down_enabled:
+                start_state = make_robot_state_from_joints(ctx, start_q)
+                start_state = _project_start_state_to_down_orientation(
+                    ctx=ctx,
+                    start_state=start_state,
+                    seed=int(args.seed),
+                    ik_timeout_s=float(args.ik_timeout),
+                )
+                start_q = list(map(float, start_state.get_joint_group_positions(ctx.group)))
+                start_label = f"{start_label}_down"
+                print("[run] start state adjusted: p0-down (vertical-down tip orientation)")
+
+            start_state = make_robot_state_from_joints(ctx, start_q)
+            start_state, adjusted_for_collision, used_trials = _sanitize_start_state_for_planning(
+                ctx=ctx,
+                start_state=start_state,
+                seed=int(args.seed),
+                ik_timeout_s=float(args.ik_timeout),
+            )
+            start_q = list(map(float, start_state.get_joint_group_positions(ctx.group)))
+            if adjusted_for_collision:
+                print(
+                    "[run] start state adjusted: collision-free IK projection "
+                    f"(trials={int(used_trials)})"
+                )
+            elif int(used_trials) < 0:
+                print(
+                    "[run] WARN: start state collision sanitization failed; "
+                    "origin planner may fail at CheckStartStateCollision."
+                )
+
+            # Backward compatibility: old targets.json may not contain orientation.
+            if any(bool(v) for v in target_orientation_missing):
+                start_state_for_target_pose = make_robot_state_from_joints(ctx, start_q)
+                start_tip_pose = start_state_for_target_pose.get_pose(ctx.tip_link)
+                fallback_q = _quat_normalize_xyzw(
+                    (
+                        float(start_tip_pose.orientation.x),
+                        float(start_tip_pose.orientation.y),
+                        float(start_tip_pose.orientation.z),
+                        float(start_tip_pose.orientation.w),
+                    )
+                )
+                targets = [
+                    (tp.with_orientation(fallback_q) if bool(missing) else tp)
+                    for tp, missing in zip(targets, target_orientation_missing)
+                ]
+                print(
+                    "[select] reuse targets missing orientation detected; "
+                    "filled with current p0 tip orientation for compatibility."
+                )
         else:
             # Build start state (p0)
             p0_list = parse_joint_positions(str(args.p0), ctx.dof)
@@ -457,9 +744,36 @@ def main() -> None:
                 start_label = named_start_raw
                 named_start_for_seeding = named_start_raw
 
+            if p0_down_enabled:
+                start_state = _project_start_state_to_down_orientation(
+                    ctx=ctx,
+                    start_state=start_state,
+                    seed=int(args.seed),
+                    ik_timeout_s=float(args.ik_timeout),
+                )
+                start_label = f"{start_label}_down"
+                print("[run] start state adjusted: p0-down (vertical-down tip orientation)")
+
+            start_state, adjusted_for_collision, used_trials = _sanitize_start_state_for_planning(
+                ctx=ctx,
+                start_state=start_state,
+                seed=int(args.seed),
+                ik_timeout_s=float(args.ik_timeout),
+            )
+            if adjusted_for_collision:
+                print(
+                    "[run] start state adjusted: collision-free IK projection "
+                    f"(trials={int(used_trials)})"
+                )
+            elif int(used_trials) < 0:
+                print(
+                    "[run] WARN: start state collision sanitization failed; "
+                    "origin planner may fail at CheckStartStateCollision."
+                )
+
             start_q = list(map(float, start_state.get_joint_group_positions(ctx.group)))
 
-            # Nominal tip orientation from start state (used as base quaternion for sampling yaw)
+            # Fallback nominal tip orientation from start state (used if a point has invalid quaternion).
             tip_pose = start_state.get_pose(ctx.tip_link)
             q_nominal = (
                 float(tip_pose.orientation.x),
@@ -471,6 +785,10 @@ def main() -> None:
                 x=float(tip_pose.position.x),
                 y=float(tip_pose.position.y),
                 z=float(tip_pose.position.z),
+                qx=float(q_nominal[0]),
+                qy=float(q_nominal[1]),
+                qz=float(q_nominal[2]),
+                qw=float(q_nominal[3]),
             )
 
             # Workspace bounds (used for candidate FK sampling)
@@ -494,7 +812,7 @@ def main() -> None:
                 for trial in range(1, resample_max + 1):
                     trials_used = trial
 
-                    # sample one FK-reachable point (position only), enforce separation
+                    # sample one FK-reachable pose, enforce separation by position
                     tp = sample_one_reachable_point_fk(
                         ctx,
                         rng=rng_points,
@@ -510,7 +828,7 @@ def main() -> None:
                     pre_payload = sample_ik_solutions(
                         ctx,
                         target_point=tp,
-                        nominal_tip_quat_xyzw=q_nominal,
+                        nominal_tip_quat_xyzw=tp.normalized_quat_xyzw(fallback_xyzw=q_nominal),
                         named_start_for_seeding=str(named_start_for_seeding),
                         num_solutions=50,
                         num_spaces=max(1, min(int(args.num_spaces), int(precheck_spaces))),
@@ -530,7 +848,7 @@ def main() -> None:
                     payload = sample_ik_solutions_multi_pass(
                         ctx,
                         target_point=tp,
-                        nominal_tip_quat_xyzw=q_nominal,
+                        nominal_tip_quat_xyzw=tp.normalized_quat_xyzw(fallback_xyzw=q_nominal),
                         named_start_for_seeding=str(named_start_for_seeding),
                         requested=requested,
                         passes=topup_passes,
@@ -607,12 +925,13 @@ def main() -> None:
                 save_ik_json(str(out_path), best_payload)
                 print(
                     f"[select] p{i}: ({best_target.x:.3f}, {best_target.y:.3f}, {best_target.z:.3f}) "
+                    f"quat=({best_target.qx:.3f}, {best_target.qy:.3f}, {best_target.qz:.3f}, {best_target.qw:.3f}) "
                     f"found {best_found}/{requested} "
                     f"(trials_used={best_payload['meta'].get('resample_trials_used')}, "
                     f"solve_elapsed={solve_elapsed_s:.4f}s) -> {out_path.name}"
                 )
 
-        # Save run metadata (targets only contain coordinates, per requirement)
+        # Save run metadata (targets contain Cartesian pose)
         write_targets_json(
             data_paths.targets_json,
             timestamp=data_paths.timestamp,
@@ -752,6 +1071,61 @@ def main() -> None:
                 "segments": segments,
                 "total_time_s": float(sum(segment_times)),
                 "note": str(note),
+            }
+
+        def _replay_selected_path_with_true_planner(res) -> Dict:
+            joint_targets: List[List[float]] = []
+            selected_meta: List[Dict] = []
+            for seg in res.segments:
+                q = [float(v) for v in seg.best_solution.joint_positions]
+                joint_targets.append(list(q))
+                selected_meta.append(
+                    {
+                        "solution_index_0based": int(seg.best_solution.index),
+                        "solution_index_1based": int(seg.best_solution.index) + 1,
+                        "solution_id": f"p{seg.seg_idx_1based}_{int(seg.best_solution.index)+1}",
+                        "attempt": int(seg.best_solution.attempt),
+                        "joint_positions": [float(v) for v in seg.best_solution.joint_positions],
+                    }
+                )
+
+            replay = compute_joint_target_path_time(
+                ctx=ctx,
+                start_q=start_q,
+                joint_targets=joint_targets,
+            )
+            seg_times = [float(seg.trajectory_time_s) for seg in replay.segments]
+            cumulative = [float(v) for v in np.cumsum(np.asarray(seg_times, dtype=float))]
+            segments: List[Dict] = []
+            for i, seg in enumerate(replay.segments):
+                meta = selected_meta[i] if i < len(selected_meta) else {}
+                segments.append(
+                    {
+                        "from": str(seg.from_label),
+                        "to": str(seg.to_label),
+                        "time_s": float(seg.trajectory_time_s),
+                        "planning_elapsed_s": float(seg.planning_elapsed_s),
+                        "start_joint_positions": [float(v) for v in seg.start_joint_positions],
+                        "end_joint_positions": [float(v) for v in seg.end_joint_positions],
+                        "solution_index_0based": int(meta.get("solution_index_0based", -1)),
+                        "solution_index_1based": int(meta.get("solution_index_1based", 0)),
+                        "solution_id": str(meta.get("solution_id", "")),
+                        "attempt": int(meta.get("attempt", 0)),
+                        "joint_positions": list(meta.get("joint_positions", [])),
+                    }
+                )
+
+            return {
+                "status": str(replay.status),
+                "method": str(replay.method),
+                "planner_id": str(replay.planner_id),
+                "planning_frame": str(replay.planning_frame),
+                "segment_times_s": [float(v) for v in seg_times],
+                "cumulative_times_s": cumulative,
+                "segments": segments,
+                "total_time_s": float(replay.total_time_s),
+                "planning_elapsed_total_s": float(replay.planning_elapsed_total_s),
+                "note": str(replay.note),
             }
 
 
@@ -909,6 +1283,8 @@ def main() -> None:
         window_selection_timing_total_s_by_ws: Dict[str, float] = {}
         trapezoid_solutions_totg_results_by_ws: Dict[str, Dict] = {}
         trapezoid_solutions_totg_total_time_s_by_ws: Dict[str, float] = {}
+        trapezoid_solutions_true_plan_results_by_ws: Dict[str, Dict] = {}
+        trapezoid_solutions_true_plan_total_time_s_by_ws: Dict[str, float] = {}
 
         for ws in ws_list:
             print(f"\n[eval] window policy (ws={ws}/{n}) ...")
@@ -966,6 +1342,26 @@ def main() -> None:
                         f"{str(replay_payload.get('note', ''))}"
                     )
 
+                print("[eval] replay selected solutions with true planner timing ...")
+                replay_true_payload = _replay_selected_path_with_true_planner(res)
+                replay_true_payload_with_ws = dict(replay_true_payload)
+                replay_true_payload_with_ws["window_size"] = int(ws)
+                trapezoid_solutions_true_plan_results_by_ws[str(ws)] = dict(replay_true_payload_with_ws)
+                trapezoid_solutions_true_plan_total_time_s_by_ws[str(ws)] = float(
+                    replay_true_payload.get("total_time_s", 0.0)
+                )
+                if str(replay_true_payload.get("status", "")) == "ok":
+                    print(
+                        "[eval] trapezoid_solutions_true_plan total_time_s = "
+                        f"{float(replay_true_payload['total_time_s']):.6f}"
+                    )
+                else:
+                    print(
+                        "[eval] WARN trapezoid_solutions_true_plan status="
+                        f"{str(replay_true_payload.get('status', 'unknown'))}: "
+                        f"{str(replay_true_payload.get('note', ''))}"
+                    )
+
         # Build unified summary.json (keeps the same overall structure as panda_ik_global_window,
         # but records results by window_size instead of separate greedy/global/window blocks).
         import json
@@ -1001,6 +1397,7 @@ def main() -> None:
                 "seed": int(args.seed),
                 "group": str(ctx.group),
                 "tip_link": str(ctx.tip_link),
+                "p0_down": bool(p0_down_enabled),
                 "num_points": int(n),
                 "num_solutions": int(requested),
                 "path_pattern": str(path_pattern),
@@ -1023,16 +1420,18 @@ def main() -> None:
                     "This run evaluates ONLY the requested window_size(s)."
                 ),
             },
-            "units": {"cartesian_position": "m", "joint_position": "rad", "time": "s"},
+            "units": {
+                "cartesian_position": "m",
+                "cartesian_orientation": "quaternion_xyzw",
+                "joint_position": "rad",
+                "time": "s",
+            },
             "start": {
                 "name": "p0",
                 "label": str(start_label),
                 "joint_positions": [float(v) for v in start_q],
             },
-            "targets": [
-                {"name": f"p{i}", "x": float(p.x), "y": float(p.y), "z": float(p.z)}
-                for i, p in enumerate(targets, start=1)
-            ],
+            "targets": [_target_pose_payload(f"p{i}", p) for i, p in enumerate(targets, start=1)],
             "ik_files": {f"p{i}": data_paths.ik_json_for_point(i).name for i in range(1, n + 1)},
             "ik_sampling_meta": {f"p{i}": dict(meta) for i, meta in enumerate(ik_meta_by_point, start=1)},
             "ik_solve_timing": dict(ik_solve_timing_payload),
@@ -1080,6 +1479,33 @@ def main() -> None:
                     dict(trapezoid_solutions_totg_results_by_ws[str(ws)])
                     for ws in ws_list
                     if str(ws) in trapezoid_solutions_totg_results_by_ws
+                ],
+            },
+            "trapezoid_solutions_true_plan": {
+                "enabled": bool(evaluate_trapezoid_solutions_with_totg),
+                "status": (
+                    "not_applicable"
+                    if not evaluate_trapezoid_solutions_with_totg
+                    else (
+                        "ok"
+                        if all(
+                            str(v.get("status", "")) == "ok"
+                            for v in trapezoid_solutions_true_plan_results_by_ws.values()
+                        )
+                        else "partial"
+                    )
+                ),
+                "note": (
+                    "Only generated when selected solutions are chosen by trapezoid timing."
+                    if not evaluate_trapezoid_solutions_with_totg
+                    else "Replay timing for trapezoid-selected solutions computed by true planner point-to-point calls."
+                ),
+                "total_time_s_by_ws": dict(trapezoid_solutions_true_plan_total_time_s_by_ws),
+                "results_by_ws": dict(trapezoid_solutions_true_plan_results_by_ws),
+                "results": [
+                    dict(trapezoid_solutions_true_plan_results_by_ws[str(ws)])
+                    for ws in ws_list
+                    if str(ws) in trapezoid_solutions_true_plan_results_by_ws
                 ],
             },
             "window": {

@@ -245,7 +245,7 @@ def sample_ik_solutions(
     seed: int = 7,
 ) -> Dict:
     """
-    Sample many IK solutions for one Cartesian point.
+    Sample many IK solutions for one Cartesian target pose.
 
     This is adapted from the provided `ik_sampler_space.py` implementation,
     keeping the same "yaw spaces + nullspace exploration" idea.
@@ -299,7 +299,18 @@ def sample_ik_solutions(
     span = np.where(span > 1e-12, span, 2.0 * math.pi)
     highs = lows + span
 
-    q_nominal = quat_normalize(tuple(map(float, nominal_tip_quat_xyzw)))
+    q_nominal = target_point.normalized_quat_xyzw(
+        fallback_xyzw=tuple(map(float, nominal_tip_quat_xyzw))
+    )
+    target_point_payload = {
+        "x": float(target_point.x),
+        "y": float(target_point.y),
+        "z": float(target_point.z),
+        "qx": float(q_nominal[0]),
+        "qy": float(q_nominal[1]),
+        "qz": float(q_nominal[2]),
+        "qw": float(q_nominal[3]),
+    }
 
     uniq_keys = set()
     solutions: List[Dict] = []
@@ -726,9 +737,15 @@ def sample_ik_solutions(
             sol_dict = {
                 "index": int(len(solutions)),
                 "attempt": int(attempt_sel),
-                "target_point": {"x": float(target_point.x), "y": float(target_point.y), "z": float(target_point.z)},
+                "target_point": dict(target_point_payload),
                 "tip_link": str(tip_link),
                 "sampled_yaw_rad": float(yaw),
+                "ik_target_quat_xyzw": [
+                    float(q_target[0]),
+                    float(q_target[1]),
+                    float(q_target[2]),
+                    float(q_target[3]),
+                ],
                 "joint_names": joint_names,
                 "joint_positions": [float(v) for v in np.asarray(q_sel, dtype=float).tolist()],
             }
@@ -750,7 +767,7 @@ def sample_ik_solutions(
         "group": str(group),
         "tip_link": str(tip_link),
         "named_start_for_seeding": str(named_start_for_seeding),
-        "target_point": {"x": float(target_point.x), "y": float(target_point.y), "z": float(target_point.z)},
+        "target_point": dict(target_point_payload),
         "requested": int(num_solutions),
         "found": int(len(solutions)),
         "attempts": int(attempts),

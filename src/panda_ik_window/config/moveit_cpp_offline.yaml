@@ -5,4 +5,13 @@ planning_scene_monitor_options:
 
 planning_pipelines:
   pipeline_names: ["pilz_industrial_motion_planner"]
+  default_planning_pipeline: "pilz_industrial_motion_planner"
   namespace: ""
+
+plan_request_params:
+  planning_pipeline: "pilz_industrial_motion_planner"
+  planner_id: "PTP"
+  planning_time: 2.0
+  planning_attempts: 1
+  max_velocity_scaling_factor: 1.0
+  max_acceleration_scaling_factor: 1.0

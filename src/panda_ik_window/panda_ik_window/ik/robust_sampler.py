@@ -154,11 +154,23 @@ def sample_ik_solutions_multi_pass(
     elif found < requested:
         reason = "insufficient_unique_solutions_under_constraints"
 
+    q_nominal = target_point.normalized_quat_xyzw(
+        fallback_xyzw=tuple(map(float, nominal_tip_quat_xyzw))
+    )
+
     meta = {
         "group": str(ctx.group),
         "tip_link": str(ctx.tip_link),
         "named_start_for_seeding": str(named_start_for_seeding),
-        "target_point": {"x": float(target_point.x), "y": float(target_point.y), "z": float(target_point.z)},
+        "target_point": {
+            "x": float(target_point.x),
+            "y": float(target_point.y),
+            "z": float(target_point.z),
+            "qx": float(q_nominal[0]),
+            "qy": float(q_nominal[1]),
+            "qz": float(q_nominal[2]),
+            "qw": float(q_nominal[3]),
+        },
         "requested": int(requested),
         "found": int(found),
         "passes_requested": int(passes),

@@ -5,7 +5,7 @@ Batch compare time models (totg vs trapezoid) for panda_ik_window.
 
 Outputs in summary-dir:
   - *_summary.txt
-  - time.csv (per seed + ws>1: origin, greedy(ws=1), trapezoid(ws), trapezoid_solutions_totg(ws))
+  - time.csv (per seed + ws>1: origin, greedy_totg(ws=1), trapezoid(ws), trapezoid_sol_totg(ws), totg(ws), trapezoid_sol_true_plan(ws))
 
 Example:
   python3 script/batch_time_model.py \
@@ -212,7 +212,14 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
     origin = data.get("origin", {})
     if not isinstance(origin, dict):
         origin = {}
-    origin_total_time_s = _safe_float(origin.get("total_time_s", math.nan))
+    origin_status = str(origin.get("status", "")).strip().lower()
+    origin_total_time_s_raw = _safe_float(origin.get("total_time_s", math.nan))
+    if origin_status == "ok":
+        origin_total_time_s = float(origin_total_time_s_raw)
+    else:
+        # Origin baseline can fail at planning stage; in that case many summaries carry 0.0.
+        # Treat non-ok as unavailable in batch CSV to avoid misleading zeros.
+        origin_total_time_s = float("nan")
 
     trapezoid_solutions_totg = data.get("trapezoid_solutions_totg", {})
     if not isinstance(trapezoid_solutions_totg, dict):
@@ -226,6 +233,19 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
         if not key:
             continue
         trap_totg_total_by_ws[key] = _safe_float(v)
+
+    trapezoid_solutions_true_plan = data.get("trapezoid_solutions_true_plan", {})
+    if not isinstance(trapezoid_solutions_true_plan, dict):
+        trapezoid_solutions_true_plan = {}
+    trap_true_plan_total_by_ws_raw = trapezoid_solutions_true_plan.get("total_time_s_by_ws", {})
+    if not isinstance(trap_true_plan_total_by_ws_raw, dict):
+        trap_true_plan_total_by_ws_raw = {}
+    trap_true_plan_total_by_ws: Dict[str, float] = {}
+    for k, v in trap_true_plan_total_by_ws_raw.items():
+        key = str(k).strip()
+        if not key:
+            continue
+        trap_true_plan_total_by_ws[key] = _safe_float(v)
 
     window_total_time_s_by_ws: Dict[str, float] = {}
     for k, v in totals_map.items():
@@ -328,9 +348,11 @@ def _extract_model_metrics(summary_json: Path, *, ws_ref: int, ws_cmp: int) -> D
     return {
         "status": "ok",
         "summary_path": str(summary_json),
+        "origin_status": str(origin_status),
         "origin_total_time_s": float(origin_total_time_s),
         "window_total_time_s_by_ws": dict(window_total_time_s_by_ws),
         "trapezoid_solutions_totg_total_time_s_by_ws": dict(trap_totg_total_by_ws),
+        "trapezoid_solutions_true_plan_total_time_s_by_ws": dict(trap_true_plan_total_by_ws),
         "ws": {
             str(int(ws_ref)): ws_ref_data,
             str(int(ws_cmp)): ws_cmp_data,
@@ -375,56 +397,100 @@ def _write_time_csv(
                 "seed",
                 "ws",
                 "origin_time_s",
-                "greedy_time_s",
+                "greedy_totg_time_s",
                 "trapezoid_time_s",
-                "trapezoid_solutions_totg_time_s",
+                "trapezoid_sol_totg_time_s",
+                "totg_time_s",
+                "trapezoid_sol_true_plan_time_s",
             ]
         )
 
         for seed in seeds:
             by_model = results.get(int(seed), {})
             trap_item = by_model.get("trapezoid", {})
-            if not isinstance(trap_item, dict) or str(trap_item.get("status", "")) != "ok":
-                for ws in ws_targets:
-                    writer.writerow([int(seed), int(ws), "nan", "nan", "nan", "nan"])
-                continue
+            if not isinstance(trap_item, dict):
+                trap_item = {}
+            totg_item = by_model.get("totg", {})
+            if not isinstance(totg_item, dict):
+                totg_item = {}
 
-            origin_time_s = _safe_float(trap_item.get("origin_total_time_s", math.nan))
-            window_totals = trap_item.get("window_total_time_s_by_ws", {})
-            if not isinstance(window_totals, dict):
-                window_totals = {}
-            trap_totg_totals = trap_item.get("trapezoid_solutions_totg_total_time_s_by_ws", {})
-            if not isinstance(trap_totg_totals, dict):
-                trap_totg_totals = {}
-            ws_payload = trap_item.get("ws", {})
-            if not isinstance(ws_payload, dict):
-                ws_payload = {}
+            trap_ok = str(trap_item.get("status", "")) == "ok"
+            totg_ok = str(totg_item.get("status", "")) == "ok"
 
-            greedy_time_s = _safe_float(window_totals.get("1", math.nan))
-            if not _is_finite(greedy_time_s):
-                ws1 = ws_payload.get("1", {})
-                if isinstance(ws1, dict):
-                    greedy_time_s = _safe_float(ws1.get("total_time_s", math.nan))
+            origin_time_s = float("nan")
+            greedy_totg_time_s = float("nan")
+            window_totals: Dict[str, float] = {}
+            trap_totg_totals: Dict[str, float] = {}
+            trap_true_plan_totals: Dict[str, float] = {}
+            ws_payload: Dict[str, Dict] = {}
+            if trap_ok:
+                origin_time_s = _safe_float(trap_item.get("origin_total_time_s", math.nan))
+                window_totals_raw = trap_item.get("window_total_time_s_by_ws", {})
+                if isinstance(window_totals_raw, dict):
+                    window_totals = dict(window_totals_raw)
+                trap_totg_totals_raw = trap_item.get("trapezoid_solutions_totg_total_time_s_by_ws", {})
+                if isinstance(trap_totg_totals_raw, dict):
+                    trap_totg_totals = dict(trap_totg_totals_raw)
+                trap_true_plan_totals_raw = trap_item.get("trapezoid_solutions_true_plan_total_time_s_by_ws", {})
+                if isinstance(trap_true_plan_totals_raw, dict):
+                    trap_true_plan_totals = dict(trap_true_plan_totals_raw)
+                ws_payload_raw = trap_item.get("ws", {})
+                if isinstance(ws_payload_raw, dict):
+                    ws_payload = dict(ws_payload_raw)
+
+            totg_window_totals: Dict[str, float] = {}
+            totg_ws_payload: Dict[str, Dict] = {}
+            if totg_ok:
+                totg_window_totals_raw = totg_item.get("window_total_time_s_by_ws", {})
+                if isinstance(totg_window_totals_raw, dict):
+                    totg_window_totals = dict(totg_window_totals_raw)
+                totg_ws_payload_raw = totg_item.get("ws", {})
+                if isinstance(totg_ws_payload_raw, dict):
+                    totg_ws_payload = dict(totg_ws_payload_raw)
+
+                greedy_totg_time_s = _safe_float(totg_window_totals.get("1", math.nan))
+                if not _is_finite(greedy_totg_time_s):
+                    ws1 = totg_ws_payload.get("1", {})
+                    if isinstance(ws1, dict):
+                        greedy_totg_time_s = _safe_float(ws1.get("total_time_s", math.nan))
 
             for ws in ws_targets:
                 key = str(int(ws))
 
-                trapezoid_time_s = _safe_float(window_totals.get(key, math.nan))
-                if not _is_finite(trapezoid_time_s):
-                    ws_item = ws_payload.get(key, {})
-                    if isinstance(ws_item, dict):
-                        trapezoid_time_s = _safe_float(ws_item.get("total_time_s", math.nan))
+                trapezoid_time_s = float("nan")
+                if trap_ok:
+                    trapezoid_time_s = _safe_float(window_totals.get(key, math.nan))
+                    if not _is_finite(trapezoid_time_s):
+                        ws_item = ws_payload.get(key, {})
+                        if isinstance(ws_item, dict):
+                            trapezoid_time_s = _safe_float(ws_item.get("total_time_s", math.nan))
 
-                trap_sol_totg_time_s = _safe_float(trap_totg_totals.get(key, math.nan))
+                trap_sol_totg_time_s = float("nan")
+                if trap_ok:
+                    trap_sol_totg_time_s = _safe_float(trap_totg_totals.get(key, math.nan))
+
+                trap_sol_true_plan_time_s = float("nan")
+                if trap_ok:
+                    trap_sol_true_plan_time_s = _safe_float(trap_true_plan_totals.get(key, math.nan))
+
+                totg_time_s = float("nan")
+                if totg_ok:
+                    totg_time_s = _safe_float(totg_window_totals.get(key, math.nan))
+                    if not _is_finite(totg_time_s):
+                        totg_ws_item = totg_ws_payload.get(key, {})
+                        if isinstance(totg_ws_item, dict):
+                            totg_time_s = _safe_float(totg_ws_item.get("total_time_s", math.nan))
 
                 writer.writerow(
                     [
                         int(seed),
                         int(ws),
                         _fmt_csv_num(origin_time_s),
-                        _fmt_csv_num(greedy_time_s),
+                        _fmt_csv_num(greedy_totg_time_s),
                         _fmt_csv_num(trapezoid_time_s),
                         _fmt_csv_num(trap_sol_totg_time_s),
+                        _fmt_csv_num(totg_time_s),
+                        _fmt_csv_num(trap_sol_true_plan_time_s),
                     ]
                 )
 

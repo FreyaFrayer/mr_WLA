@@ -19,6 +19,7 @@ def generate_launch_description() -> LaunchDescription:
 
     group = LaunchConfiguration("group")
     named_start = LaunchConfiguration("named_start")
+    p0_down = LaunchConfiguration("p0_down")
     data_root = LaunchConfiguration("data_root")
     reuse_candidates_dir = LaunchConfiguration("reuse_candidates_dir")
 
@@ -83,6 +84,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("path_pattern", default_value="random"),
             DeclareLaunchArgument("group", default_value="panda_arm"),
             DeclareLaunchArgument("named_start", default_value="random"),
+            DeclareLaunchArgument("p0_down", default_value="false"),
             DeclareLaunchArgument("data_root", default_value="data_window"),
             DeclareLaunchArgument("reuse_candidates_dir", default_value=""),
             DeclareLaunchArgument("num_solutions", default_value="200"),
@@ -125,6 +127,8 @@ def generate_launch_description() -> LaunchDescription:
                     group,
                     "--named-start",
                     named_start,
+                    "--p0-down",
+                    p0_down,
                     "--data-root",
                     data_root,
                     "--reuse-candidates-dir",

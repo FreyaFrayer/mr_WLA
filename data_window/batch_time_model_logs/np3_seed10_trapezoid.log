@@ -1,0 +1,84 @@
+[INFO] [launch]: All log files can be found below /home/cao/.ros/log/2026-04-07-19-11-48-548041-mvt-7782
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [ik_window-1]: process started with pid [7785]
+[ik_window-1] [INFO] [1775589108.888577438] [moveit_3504868931.moveit.py.cpp_initializer]: Initialize rclcpp
+[ik_window-1] [INFO] [1775589108.888640066] [moveit_3504868931.moveit.py.cpp_initializer]: Initialize node parameters
+[ik_window-1] [INFO] [1775589108.888648316] [moveit_3504868931.moveit.py.cpp_initializer]: Initialize node and executor
+[ik_window-1] [INFO] [1775589108.891576884] [moveit_3504868931.moveit.py.cpp_initializer]: Spin separate thread
+[ik_window-1] [INFO] [1775589108.894155516] [moveit_3504868931.moveit.ros.rdf_loader]: Loaded robot model in 0.00247959 seconds
+[ik_window-1] [INFO] [1775589108.894199352] [moveit_3504868931.moveit.core.robot_model]: Loading robot model 'panda'...
+[ik_window-1] [INFO] [1775589108.901367471] [moveit_3504868931.moveit.kinematics.kdl_kinematics_plugin]: Joint weights for group 'panda_arm': 1 1 1 1 1 1 1
+[ik_window-1] [INFO] [1775589108.920176438] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Publishing maintained planning scene on 'monitored_planning_scene'
+[ik_window-1] [INFO] [1775589108.920265110] [moveit_3504868931.moveit.ros.moveit_cpp]: Listening to 'joint_states' for joint states
+[ik_window-1] [INFO] [1775589108.920936352] [moveit_3504868931.moveit.ros.current_state_monitor]: Listening to joint states on topic 'joint_states'
+[ik_window-1] [INFO] [1775589108.921154072] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Listening to '/attached_collision_object' for attached collision objects
+[ik_window-1] [INFO] [1775589108.921166531] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Stopping existing planning scene publisher.
+[ik_window-1] [INFO] [1775589108.921290996] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Stopped publishing maintained planning scene.
+[ik_window-1] [INFO] [1775589108.921483547] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Publishing maintained planning scene on 'monitored_planning_scene'
+[ik_window-1] [INFO] [1775589108.921613596] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Starting planning scene monitor
+[ik_window-1] [INFO] [1775589108.921864692] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Listening to '/planning_scene'
+[ik_window-1] [INFO] [1775589108.921877359] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Starting world geometry update monitor for collision objects, attached objects, octomap updates.
+[ik_window-1] [INFO] [1775589108.922018742] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Listening to 'collision_object'
+[ik_window-1] [INFO] [1775589108.922140498] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Listening to 'planning_scene_world' for planning scene world geometry
+[ik_window-1] [WARN] [1775589108.922771780] [moveit_3504868931.moveit.ros.occupancy_map_monitor]: Resolution not specified for Octomap. Assuming resolution = 0.1 instead
+[ik_window-1] [ERROR] [1775589108.922793865] [moveit_3504868931.moveit.ros.occupancy_map_monitor]: No 3D sensor plugin(s) defined for octomap updates
+[ik_window-1] [INFO] [1775589108.927399310] [moveit_3504868931.moveit.planners.pilz.joint_limits_aggregator]: Reading limits from namespace robot_description_planning
+[ik_window-1] [WARN] [1775589108.927906878] [moveit_3504868931.moveit.planners.pilz.joint_limits_aggregator]: Multi-DOF-Joint 'virtual_joint' not supported.
+[ik_window-1] [WARN] [1775589108.927931879] [moveit_3504868931.moveit.planners.pilz.joint_limits_aggregator]: Multi-DOF-Joint 'virtual_joint' not supported.
+[ik_window-1] [INFO] [1775589108.929975401] [moveit_3504868931.moveit.planners.pilz.command_planner]: Available plugins: pilz_industrial_motion_planner/PlanningContextLoaderCIRC pilz_industrial_motion_planner/PlanningContextLoaderLIN pilz_industrial_motion_planner/PlanningContextLoaderPTP pilz_industrial_motion_planner/PlanningContextLoaderPolyline 
+[ik_window-1] [INFO] [1775589108.929992860] [moveit_3504868931.moveit.planners.pilz.command_planner]: About to load: pilz_industrial_motion_planner/PlanningContextLoaderCIRC
+[ik_window-1] [INFO] [1775589108.930792568] [moveit_3504868931.moveit.planners.pilz.command_planner]: Registered Algorithm [CIRC]
+[ik_window-1] [INFO] [1775589108.930810444] [moveit_3504868931.moveit.planners.pilz.command_planner]: About to load: pilz_industrial_motion_planner/PlanningContextLoaderLIN
+[ik_window-1] [INFO] [1775589108.931338804] [moveit_3504868931.moveit.planners.pilz.command_planner]: Registered Algorithm [LIN]
+[ik_window-1] [INFO] [1775589108.931360639] [moveit_3504868931.moveit.planners.pilz.command_planner]: About to load: pilz_industrial_motion_planner/PlanningContextLoaderPTP
+[ik_window-1] [INFO] [1775589108.931870582] [moveit_3504868931.moveit.planners.pilz.command_planner]: Registered Algorithm [PTP]
+[ik_window-1] [INFO] [1775589108.931884957] [moveit_3504868931.moveit.planners.pilz.command_planner]: About to load: pilz_industrial_motion_planner/PlanningContextLoaderPolyline
+[ik_window-1] [INFO] [1775589108.932450237] [moveit_3504868931.moveit.planners.pilz.command_planner]: Registered Algorithm [POLYLINE]
+[ik_window-1] [INFO] [1775589108.932470363] [moveit_3504868931.moveit.ros.planning_pipeline]: Successfully loaded planner 'Pilz Industrial Motion Planner'
+[ik_window-1] [INFO] [1775589108.934238329] [panda_ik_window]: Try loading adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[ik_window-1] [INFO] [1775589108.934830942] [panda_ik_window]: Loaded adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[ik_window-1] [INFO] [1775589108.934839234] [panda_ik_window]: Try loading adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[ik_window-1] [INFO] [1775589108.934851068] [panda_ik_window]: Loaded adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[ik_window-1] [INFO] [1775589108.934853569] [panda_ik_window]: Try loading adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[ik_window-1] [INFO] [1775589108.934860069] [panda_ik_window]: Loaded adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[ik_window-1] [WARN] [1775589108.934862361] [moveit_3504868931.moveit.ros.planning_pipeline]: No planning response adapter names specified.
+[ik_window-1] [INFO] [1775589108.945829217] [moveit_3504868931.moveit.plugins.simple_controller_manager]: Added FollowJointTrajectory controller for panda_arm_controller
+[ik_window-1] [INFO] [1775589108.945968265] [moveit_3504868931.moveit.plugins.simple_controller_manager]: Returned 1 controllers in list
+[ik_window-1] [INFO] [1775589108.945981808] [moveit_3504868931.moveit.plugins.simple_controller_manager]: Returned 1 controllers in list
+[ik_window-1] [INFO] [1775589108.946236071] [moveit_3504868931.moveit.ros.trajectory_execution_manager]: Trajectory execution is managing controllers
+[ik_window-1] [WARN] [1775589109.016273048] [panda_ik_window]: Parameter 'plan_request_params.planner_id' not found in config use default value instead, check parameter type and namespace in YAML file
+[ik_window-1] [WARN] [1775589109.016310258] [panda_ik_window]: Parameter 'plan_request_params.planning_pipeline' not found in config use default value instead, check parameter type and namespace in YAML file
+[ik_window-1] [WARN] [1775589109.016313967] [panda_ik_window]: Parameter 'plan_request_params.planning_time' not found in config use default value instead, check parameter type and namespace in YAML file
+[ik_window-1] [WARN] [1775589109.016316550] [panda_ik_window]: Parameter 'plan_request_params.planning_attempts' not found in config use default value instead, check parameter type and namespace in YAML file
+[ik_window-1] [WARN] [1775589109.016341718] [panda_ik_window]: Parameter 'plan_request_params.max_velocity_scaling_factor' not found in config use default value instead, check parameter type and namespace in YAML file
+[ik_window-1] [WARN] [1775589109.016345302] [panda_ik_window]: Parameter 'plan_request_params.max_acceleration_scaling_factor' not found in config use default value instead, check parameter type and namespace in YAML file
+[ik_window-1] [ERROR] [1775589109.016477308] [moveit_3504868931.moveit.ros.planning_pipeline_interfaces]: No planning pipeline available for name ''
+[ik_window-1] [INFO] [1775589109.050177497] [moveit_3504868931.moveit.ros.moveit_cpp]: Deleting MoveItCpp
+[ik_window-1] [INFO] [1775589109.052750421] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Stopped publishing maintained planning scene.
+[ik_window-1] [INFO] [1775589109.053194277] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Stopping world geometry monitor
+[ik_window-1] [INFO] [1775589109.053283824] [moveit_3504868931.moveit.ros.planning_scene_monitor]: Stopping planning scene monitor
+[ik_window-1] Warning: class_loader.ClassLoader: SEVERE WARNING!!! Attempting to unload library while objects created by this loader exist in the heap! You should delete your objects before attempting to unload the library or destroying the ClassLoader. The library will NOT be unloaded.
+[ik_window-1]          at line 127 in ./src/class_loader.cpp
+[ik_window-1] [run] timestamp = 20260407_191148
+[ik_window-1] [run] data dir   = data_window/batch_time_model_data/np3/seed10/model_trapezoid/20260407_191148
+[ik_window-1] [robot] WARN: MoveIt bounds missed velocity/acceleration limits for some joints; used Panda fallback dynamics for missing values.
+[ik_window-1] [select] candidate_mode = reused
+[ik_window-1] [select] reuse-candidates-dir = /home/cao/ws_0331/data_window/batch_time_model_data/np3/seed10/model_totg/20260407_191048
+[ik_window-1] [select] path_pattern argument is ignored in reuse mode: random
+[ik_window-1] [select] reused candidates loaded: points=3, solutions_per_point=200
+[ik_window-1] 
+[ik_window-1] [eval] origin path baseline (planner point-to-point, no IK selection) ...
+[ik_window-1] [eval] WARN origin planning failed: p0->p1 plan result has no trajectory
+[ik_window-1] 
+[ik_window-1] [eval] window policy (ws=1/3) ...
+[ik_window-1] [eval] replay selected solutions with TOTG timing ...
+[ik_window-1] [eval] trapezoid_solutions_totg total_time_s = 4.911985
+[ik_window-1] 
+[ik_window-1] [eval] window policy (ws=3/3) ...
+[ik_window-1] [eval] replay selected solutions with TOTG timing ...
+[ik_window-1] [eval] trapezoid_solutions_totg total_time_s = 4.048292
+[ik_window-1] [eval] summary -> summary.json
+[ik_window-1] [eval] summary -> summary.txt
+[ik_window-1] 
+[ik_window-1] [done] bye.
+[INFO] [ik_window-1]: process has finished cleanly [pid 7785]

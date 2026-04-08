@@ -12,6 +12,20 @@ def _fmt_list(xs: Sequence[float], *, prec: int = 4) -> str:
     return "[" + ", ".join(f"{float(v):.{prec}f}" for v in xs) + "]"
 
 
+def _target_pose_payload(name: str, p: TargetPoint) -> Dict[str, Any]:
+    qx, qy, qz, qw = p.normalized_quat_xyzw()
+    return {
+        "name": str(name),
+        "x": float(p.x),
+        "y": float(p.y),
+        "z": float(p.z),
+        "qx": float(qx),
+        "qy": float(qy),
+        "qz": float(qz),
+        "qw": float(qw),
+    }
+
+
 def write_targets_json(path: Path, *, timestamp: str, group: str, tip_link: str,
                        start_label: str, start_joint_positions: Sequence[float],
                        targets: Sequence[TargetPoint]) -> None:
@@ -27,7 +41,7 @@ def write_targets_json(path: Path, *, timestamp: str, group: str, tip_link: str,
             "joint_positions": [float(v) for v in start_joint_positions],
         },
         "targets": [
-            {"name": f"p{i}", "x": float(p.x), "y": float(p.y), "z": float(p.z)}
+            _target_pose_payload(f"p{i}", p)
             for i, p in enumerate(targets, start=1)
         ],
     }
@@ -109,9 +123,13 @@ def _build_human_readable_lines(
             )
         lines.append("")
 
-    lines.append("Targets (Cartesian positions, meters):")
+    lines.append("Targets (Cartesian poses, position in meters, quaternion in xyzw):")
     for i, p in enumerate(targets, start=1):
-        lines.append(f"  p{i}: ({p.x:.4f}, {p.y:.4f}, {p.z:.4f})")
+        qx, qy, qz, qw = p.normalized_quat_xyzw()
+        lines.append(
+            f"  p{i}: pos=({p.x:.4f}, {p.y:.4f}, {p.z:.4f}), "
+            f"quat=({qx:.4f}, {qy:.4f}, {qz:.4f}, {qw:.4f})"
+        )
     lines.append("")
 
     for seg in result.segments:
@@ -184,7 +202,7 @@ def write_summary_json(
 
     # Targets
     targets_list = [
-        {"name": f"p{i}", "x": float(p.x), "y": float(p.y), "z": float(p.z)}
+        _target_pose_payload(f"p{i}", p)
         for i, p in enumerate(targets, start=1)
     ]
 
@@ -234,6 +252,7 @@ def write_summary_json(
         },
         "units": {
             "cartesian_position": "m",
+            "cartesian_orientation": "quaternion_xyzw",
             "joint_position": "rad",
             "time": "s",
         },

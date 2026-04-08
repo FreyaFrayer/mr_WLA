@@ -280,7 +280,7 @@ def sample_one_reachable_point_fk(
     workspace: Optional[WorkspaceBounds] = None,
     max_attempts: int = 2000,
 ) -> TargetPoint:
-    """Sample a single *FK-reachable* Cartesian point (position only).
+    """Sample a single *FK-reachable* Cartesian target pose.
 
     This is similar to :func:`sample_reachable_points`, but designed for
     **sequential acceptance** (e.g., resampling when IK fails).
@@ -288,7 +288,7 @@ def sample_one_reachable_point_fk(
     Key idea
     --------
     We sample a random joint vector within the group bounds, run FK, and keep
-    the end-effector position. This guarantees kinematic reachability.
+    the end-effector pose. This guarantees kinematic reachability.
 
     Notes
     -----
@@ -318,6 +318,13 @@ def sample_one_reachable_point_fk(
             x=float(pose.position.x),
             y=float(pose.position.y),
             z=float(pose.position.z),
+        ).with_orientation(
+            (
+                float(pose.orientation.x),
+                float(pose.orientation.y),
+                float(pose.orientation.z),
+                float(pose.orientation.w),
+            )
         )
 
         if not workspace.contains(p):
@@ -361,7 +368,7 @@ def sample_reachable_points(
     Sample `n` reachable Cartesian points by:
       1) sampling a random joint configuration within the planning group
       2) computing forward kinematics to obtain end-effector pose
-      3) keeping only the position part
+      3) keeping both position and orientation parts
 
     This guarantees kinematic reachability because each point comes from a valid FK.
 

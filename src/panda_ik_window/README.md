@@ -5,7 +5,7 @@ MoveIt2 (MoveItPy) + Franka Panda IK sampling benchmark (window policy evaluatio
 This package:
 
 1. **Generates a dataset** (depends on `seed`):
-   - Samples `num_points = n` reachable Cartesian targets `p1..pN` (with `p0` as the start state).
+   - Samples `num_points = n` reachable Cartesian target poses `p1..pN` (with `p0` as the start state).
    - For each point `p_i`, samples exactly `num_solutions = m` IK solutions (stored in `p{i}.json`).
 
 2. **Evaluates window policies** (depends only on `window_size = ws`):
@@ -33,6 +33,7 @@ ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=8 seed:=7 window_
 
 By default, `p0` start state is now a seeded random joint state (controlled by `seed`).
 You can still force a named SRDF state with `named_start:=ready`, or provide explicit joints via `--p0`.
+Use `p0_down:=true` to force the `p0` tip orientation to vertical-down (world `-Z`) by IK while keeping the same tip position.
 
 Select path pattern (defined in `path_pattern_definition.md`):
 
@@ -91,7 +92,7 @@ python3 batch_ik_window.py --num-points 8 --seeds 7,8,9
 
 ## Key outputs
 
-- `targets.json`: start `p0` joint positions + sampled Cartesian target points `p1..pN`
-- `p1.json`..`pN.json`: IK solutions for each target point
+- `targets.json`: start `p0` joint positions + sampled Cartesian target poses `p1..pN` (`x,y,z,qx,qy,qz,qw`)
+- `p1.json`..`pN.json`: IK solutions for each target pose
 - `summary.json`: unified report with window results (only evaluated ws), plus `origin` (direct planner point-to-point time through `p0->p1..pN`, no IK candidate selection). `origin.joint_positions_by_point` records per-point joint angles (`p0..pN`) for each axis.
 - `summary.json.trapezoid_solutions_totg`: when solutions are selected with trapezoid timing, replay the same selected path with TOTG timing and record per-`ws` segment/total time.
