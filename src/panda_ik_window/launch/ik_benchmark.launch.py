@@ -46,19 +46,11 @@ def generate_launch_description() -> LaunchDescription:
     ws_xy_inner_radius = LaunchConfiguration("ws_xy_inner_radius")
     min_sep = LaunchConfiguration("min_sep")
 
-    # Segment time model
-    time_model = LaunchConfiguration("time_model")
-    totg_vel_scale = LaunchConfiguration("totg_vel_scale")
-    totg_acc_scale = LaunchConfiguration("totg_acc_scale")
-    totg_path_tolerance = LaunchConfiguration("totg_path_tolerance")
-    totg_resample_dt = LaunchConfiguration("totg_resample_dt")
-    totg_min_angle_change = LaunchConfiguration("totg_min_angle_change")
-
     # Window policy evaluation
     # Accepts: "3" or "1,3,8" or "[1,3,8]" or "all" (default).
     window_size = LaunchConfiguration("window_size")
 
-    # DP acceleration (trapezoid DP only; TOTG is CPU)
+    # DP acceleration
     device = LaunchConfiguration("device")
     dp_block_size = LaunchConfiguration("dp_block_size")
 
@@ -84,7 +76,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("num_points", default_value="8"),
             DeclareLaunchArgument("seed", default_value="7"),
             DeclareLaunchArgument("path_pattern", default_value="random"),
-            DeclareLaunchArgument("trend_max_step", default_value="0.30"),
+            DeclareLaunchArgument("trend_max_step", default_value="0.25"),
             DeclareLaunchArgument("group", default_value="panda_arm"),
             DeclareLaunchArgument("named_start", default_value="random"),
             DeclareLaunchArgument("p0_down", default_value="false"),
@@ -93,10 +85,10 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("num_solutions", default_value="100"),
             DeclareLaunchArgument("num_spaces", default_value="10"),
             DeclareLaunchArgument("max_attempts", default_value="400"),
-            DeclareLaunchArgument("ik_timeout", default_value="0.1"),
+            DeclareLaunchArgument("ik_timeout", default_value="0.05"),
             DeclareLaunchArgument("resample_max", default_value="200"),
             DeclareLaunchArgument("topup_passes", default_value="3"),
-            DeclareLaunchArgument("precheck_attempts", default_value="400"),
+            DeclareLaunchArgument("precheck_attempts", default_value="200"),
             DeclareLaunchArgument("precheck_num_spaces", default_value="5"),
             DeclareLaunchArgument("ws_x_min", default_value="-0.75"),
             DeclareLaunchArgument("ws_x_max", default_value="0.75"),
@@ -106,15 +98,9 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("ws_z_max", default_value="0.85"),
             DeclareLaunchArgument("ws_xy_inner_radius", default_value="0.25"),
             DeclareLaunchArgument("min_sep", default_value="0.06"),
-            DeclareLaunchArgument("time_model", default_value="trapezoid"),
             DeclareLaunchArgument("window_size", default_value="all"),
             DeclareLaunchArgument("device", default_value="cuda"),
             DeclareLaunchArgument("dp_block_size", default_value="256"),
-            DeclareLaunchArgument("totg_vel_scale", default_value="1.0"),
-            DeclareLaunchArgument("totg_acc_scale", default_value="1.0"),
-            DeclareLaunchArgument("totg_path_tolerance", default_value="0.1"),
-            DeclareLaunchArgument("totg_resample_dt", default_value="0.1"),
-            DeclareLaunchArgument("totg_min_angle_change", default_value="0.001"),
             Node(
                 package="panda_ik_window",
                 executable="ik_window",
@@ -174,18 +160,6 @@ def generate_launch_description() -> LaunchDescription:
                     ws_xy_inner_radius,
                     "--min-sep",
                     min_sep,
-                    "--time-model",
-                    time_model,
-                    "--totg-vel-scale",
-                    totg_vel_scale,
-                    "--totg-acc-scale",
-                    totg_acc_scale,
-                    "--totg-path-tolerance",
-                    totg_path_tolerance,
-                    "--totg-resample-dt",
-                    totg_resample_dt,
-                    "--totg-min-angle-change",
-                    totg_min_angle_change,
                 ],
             ),
         ]

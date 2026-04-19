@@ -341,6 +341,159 @@ def stratified_yaw(space_idx: int, num_spaces: int, yaw_range: float, rng: Deter
     return (-0.5 * float(yaw_range)) + (float(space_idx) + rng.uniform01()) * bin_w
 
 
+def probe_ik_feasibility(
+    ctx: RobotContext,
+    *,
+    target_point: TargetPoint,
+    nominal_tip_quat_xyzw: Tuple[float, float, float, float],
+    named_start_for_seeding: str = "ready",
+    num_spaces: int = 5,
+    max_attempts: int = 400,
+    ik_timeout_s: float = 0.05,
+    yaw_range_rad: float = 2.0 * math.pi,
+    seed: int = 7,
+) -> Dict:
+    """
+    Fast feasibility probe for one Cartesian target.
+
+    Unlike ``sample_ik_solutions``, this only answers "can we find at least one
+    collision-free IK solution?" and exits immediately on the first hit.
+    """
+    rng = DeterministicRNG(int(seed))
+
+    num_spaces = max(1, int(num_spaces))
+    max_attempts = max(1, int(max_attempts))
+
+    robot_model = ctx.robot_model
+    group = ctx.group
+    tip_link = ctx.tip_link
+    dof = len(ctx.joint_names)
+
+    lows = np.array([jl.min_position for jl in ctx.joint_limits], dtype=float)
+    highs = np.array([jl.max_position for jl in ctx.joint_limits], dtype=float)
+    if lows.shape[0] != highs.shape[0] or int(lows.shape[0]) != dof:
+        lows = np.full((dof,), -math.pi, dtype=float)
+        highs = np.full((dof,), +math.pi, dtype=float)
+
+    span = highs - lows
+    span = np.where(span > 1e-12, span, 2.0 * math.pi)
+    highs = lows + span
+
+    q_nominal = target_point.normalized_quat_xyzw(
+        fallback_xyzw=tuple(map(float, nominal_tip_quat_xyzw))
+    )
+    target_point_payload = {
+        "x": float(target_point.x),
+        "y": float(target_point.y),
+        "z": float(target_point.z),
+        "qx": float(q_nominal[0]),
+        "qy": float(q_nominal[1]),
+        "qz": float(q_nominal[2]),
+        "qw": float(q_nominal[3]),
+    }
+
+    attempts = 0
+    successes = 0
+    collision_checks = 0
+    collision_rejected = 0
+    collision_checker, collision_checker_reason = _build_state_collision_checker(ctx, group=str(group))
+    collision_checker_enabled = collision_checker is not None
+    collision_checker_runtime_disabled = False
+    space_attempt_budget = max(1, int(math.ceil(float(max_attempts) / float(num_spaces))))
+
+    t0 = time.time()
+    for space_idx in range(num_spaces):
+        if attempts >= max_attempts:
+            break
+
+        yaw = stratified_yaw(space_idx, num_spaces, float(yaw_range_rad), rng)
+        q_yaw = quat_from_yaw(yaw)
+        q_target = quat_normalize(quat_multiply(q_nominal, q_yaw))
+        pose_target = build_pose(target_point, q_target)
+
+        attempts_in_space = 0
+        while attempts < max_attempts and attempts_in_space < space_attempt_budget:
+            attempts += 1
+            attempts_in_space += 1
+
+            state = RobotState(robot_model)
+            state.set_to_default_values()
+            q_seed = rng.uniform_vec(lows, highs)
+            state.set_joint_group_positions(group, q_seed)
+
+            ok = state.set_from_ik(group, pose_target, tip_link, float(ik_timeout_s))
+            if not ok:
+                continue
+
+            successes += 1
+            state.update()
+            if collision_checker is not None:
+                collision_checks += 1
+                colliding = collision_checker(state)
+                if colliding is None:
+                    collision_checker_reason = (
+                        collision_checker_reason or "collision checker became unavailable at runtime"
+                    )
+                    collision_checker = None
+                    collision_checker_runtime_disabled = True
+                elif bool(colliding):
+                    collision_rejected += 1
+                    continue
+
+            dt = time.time() - t0
+            return {
+                "meta": {
+                    "group": str(group),
+                    "tip_link": str(tip_link),
+                    "named_start_for_seeding": str(named_start_for_seeding),
+                    "target_point": dict(target_point_payload),
+                    "requested": 1,
+                    "found": 1,
+                    "attempts": int(attempts),
+                    "ik_successes": int(successes),
+                    "self_collision_filter": {
+                        "enabled": bool(collision_checker_enabled),
+                        "checks": int(collision_checks),
+                        "rejected": int(collision_rejected),
+                        "available": bool(collision_checker_enabled and not collision_checker_runtime_disabled),
+                        "reason": str(collision_checker_reason),
+                    },
+                    "yaw_range_rad": float(yaw_range_rad),
+                    "ik_timeout_s": float(ik_timeout_s),
+                    "seed": int(seed),
+                    "num_spaces": int(num_spaces),
+                    "probe_sampled_yaw_rad": float(yaw),
+                    "elapsed_s": float(dt),
+                }
+            }
+
+    dt = time.time() - t0
+    return {
+        "meta": {
+            "group": str(group),
+            "tip_link": str(tip_link),
+            "named_start_for_seeding": str(named_start_for_seeding),
+            "target_point": dict(target_point_payload),
+            "requested": 1,
+            "found": 0,
+            "attempts": int(attempts),
+            "ik_successes": int(successes),
+            "self_collision_filter": {
+                "enabled": bool(collision_checker_enabled),
+                "checks": int(collision_checks),
+                "rejected": int(collision_rejected),
+                "available": bool(collision_checker_enabled and not collision_checker_runtime_disabled),
+                "reason": str(collision_checker_reason),
+            },
+            "yaw_range_rad": float(yaw_range_rad),
+            "ik_timeout_s": float(ik_timeout_s),
+            "seed": int(seed),
+            "num_spaces": int(num_spaces),
+            "elapsed_s": float(dt),
+        }
+    }
+
+
 def sample_ik_solutions(
     ctx: RobotContext,
     *,
@@ -511,6 +664,7 @@ def sample_ik_solutions(
             # Fallback if the inferred feature link is not available
             p_base = get_link_xyz(base_state, tip_link)
         candidates.append((base_q, int(attempts), p_base))
+        local_seen = {hash_joint_vector(base_q, float(uniq_resolution_rad))}
 
         # If there is no redundancy, fall back to random seeding (same as before).
         n0 = compute_nullspace_direction(base_state, group, tip_link, rng)
@@ -682,9 +836,6 @@ def sample_ik_solutions(
             trace_step = max(0.005, min(0.05, float(nullspace_step) * 0.25))
             min_step = max(1e-4, float(trace_step) * 0.05)
 
-            # Local uniqueness (avoid looping in the manifold trace)
-            local_seen = {hash_joint_vector(base_q, float(uniq_resolution_rad))}
-
             # We trace enough points to allow good arc-length resampling.
             # (Bounded by the per-space attempt budget anyway.)
             max_points = max(80, int(goal_in_space) * 20)
@@ -741,8 +892,9 @@ def sample_ik_solutions(
                 key = hash_joint_vector(q_new, float(uniq_resolution_rad))
                 # Keep this *local* too; we only want distinct candidates for selection.
                 # (Global uniqueness is applied below.)
-                if any(key == hash_joint_vector(c[0], float(uniq_resolution_rad)) for c in candidates):
+                if key in local_seen:
                     continue
+                local_seen.add(key)
                 candidates.append((q_new, int(attempts), p_new))
 
         # 3) Select uniformly by arc-length in feature space, then commit to global set.

@@ -122,7 +122,9 @@ ros2 launch panda_ik_window ik_benchmark.launch.py \
   trend_max_step:=0.25
 ```
 
-When the last accepted trend point is already near the workspace edge, the sampler now only accepts candidates that move back toward the safer middle region, which reduces "edge to more-edge" dead ends.
+In `trend` / `trend_plus`, the sampler now ranks a small pool of valid FK candidates and prefers the continuation that is more direction-consistent, uses a steadier step length, and stays farther from workspace edges. It also reuses a stable reference orientation instead of carrying fully random FK orientations point-to-point.
+
+When the last accepted trend point is already near the workspace edge, the sampler only accepts candidates that move back toward the safer middle region, which reduces "edge to more-edge" dead ends.
 
 Evaluate multiple window sizes in one run:
 
@@ -130,16 +132,16 @@ Evaluate multiple window sizes in one run:
 ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=8 seed:=7 window_size:="1,3,8"
 ```
 
-Reuse an existing candidate set (`targets.json` + `p*.json`) for fair time-model comparison:
+Reuse an existing candidate set (`targets.json` + `p*.json`) for repeatable evaluation:
 
 ```bash
-# 1) Generate candidates once (example: totg run)
+# 1) Generate candidates once
 ros2 launch panda_ik_window ik_benchmark.launch.py \
-  num_points:=8 seed:=7 window_size:="1,3,8" time_model:=totg data_root:=data_window/shared_seed7
+  num_points:=8 seed:=7 window_size:="1,3,8" data_root:=data_window/shared_seed7
 
-# 2) Re-evaluate with another time model on exactly the same candidates
+# 2) Re-evaluate on exactly the same candidates
 ros2 launch panda_ik_window ik_benchmark.launch.py \
-  num_points:=8 seed:=7 window_size:="1,3,8" time_model:=trapezoid \
+  num_points:=8 seed:=7 window_size:="1,3,8" \
   reuse_candidates_dir:=data_window/shared_seed7/<timestamp>
 ```
 
@@ -172,4 +174,4 @@ python3 batch_ik_window.py --num-points 8 --seeds 7,8,9
 - `targets.json`: start `p0` joint positions + sampled Cartesian target poses `p1..pN` (`x,y,z,qx,qy,qz,qw`)
 - `p1.json`..`pN.json`: IK solutions for each target pose
 - `summary.json`: unified report with window results (only evaluated ws), plus `origin` (direct planner point-to-point time through `p0->p1..pN`, no IK candidate selection). `origin.joint_positions_by_point` records per-point joint angles (`p0..pN`) for each axis.
-- `summary.json.trapezoid_solutions_totg`: when solutions are selected with trapezoid timing, replay the same selected path with TOTG timing and record per-`ws` segment/total time.
+- `summary.json.trapezoid_solutions_true_plan`: replay the trapezoid-selected joint targets with point-to-point planner calls and record per-`ws` segment/total time.

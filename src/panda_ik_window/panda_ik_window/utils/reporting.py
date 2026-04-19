@@ -93,13 +93,8 @@ def _build_human_readable_lines(
     lines.append("Time model:")
     lines.append(f"  requested: {result.time_model.requested}")
     lines.append(f"  effective: {result.time_model.effective}")
-    lines.append(f"  totg_available: {bool(result.time_model.totg_available)}")
     if str(result.time_model.note).strip():
         lines.append(f"  note: {str(result.time_model.note).strip()}")
-    if int(result.time_model.totg_failures) > 0:
-        lines.append(
-            f"  totg_failures: {int(result.time_model.totg_failures)} (these edges used trapezoid fallback)"
-        )
     lines.append("")
     lines.append(f"p0 ({start_label}) joint_positions = {_fmt_list(start_q, prec=4)}")
     lines.append("")
@@ -245,8 +240,6 @@ def write_summary_json(
             "time_model": {
                 "requested": str(result.time_model.requested),
                 "effective": str(result.time_model.effective),
-                "totg_available": bool(result.time_model.totg_available),
-                "totg_failures": int(result.time_model.totg_failures),
                 "note": str(result.time_model.note),
             },
         },

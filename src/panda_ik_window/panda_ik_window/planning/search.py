@@ -19,7 +19,6 @@ def _try_import_torch() -> Any | None:
     environments. GPU acceleration is enabled only when:
       - torch is available
       - a CUDA device is available
-      - time_model.effective == 'trapezoid'
     """
 
     try:
@@ -316,7 +315,7 @@ def _optimal_path_indices_dp(
     """Solve a small layered shortest-path problem and return the best indices.
 
     This function automatically selects a backend:
-      - CUDA Torch backend (trapezoid only) when available and requested
+      - CUDA Torch backend when available and requested
       - otherwise the original NumPy backend
 
     Parameters
@@ -326,23 +325,13 @@ def _optimal_path_indices_dp(
     layers:
         IK solution layers for consecutive points (e.g. [IK(p_i), IK(p_{i+1}), ...]).
     device:
-        'auto'|'cpu'|'cuda'|'cuda:0'... (torch-style). Only affects trapezoid mode.
+        'auto'|'cpu'|'cuda'|'cuda:0'... (torch-style).
 
     Notes
     -----
-    - TOTG mode is left untouched (CPU, nested loops) because MoveIt TOTG runs on CPU.
     - When _precomputed_Q_torch is provided, it must match `layers` and be already
       on the desired torch device.
     """
-
-    # Only accelerate trapezoid (the default).
-    if str(time_model.info.effective) != "trapezoid":
-        return _optimal_path_indices_dp_numpy(
-            start_q=start_q,
-            layers=layers,
-            time_model=time_model,
-            block_size=block_size,
-        )
 
     torch = _try_import_torch()
     if torch is None:
@@ -463,8 +452,6 @@ def greedy_path(
         requested=str(tm.requested),
         effective=str(tm.effective),
         note=str(tm.note),
-        totg_available=bool(tm.totg_available),
-        totg_failures=int(tm.totg_failures),
     )
 
     return PathResult(
@@ -504,8 +491,8 @@ def window_path_receding_horizon(
 
     GPU acceleration
     ----------------
-    When the effective time model is "trapezoid" (default) and a CUDA device is
-    available, the DP inside the window solver is executed with PyTorch on GPU.
+    When a CUDA device is available, the DP inside the window solver is executed
+    with PyTorch on GPU.
     This keeps the overall logic and output format unchanged.
     """
 
@@ -525,16 +512,15 @@ def window_path_receding_horizon(
     use_cuda = False
     Q_all_torch: List[Any] | None = None
 
-    if str(time_model.info.effective) == "trapezoid":
-        torch = _try_import_torch()
-        if torch is not None:
-            torch_device, use_cuda, _note = _resolve_torch_device(torch, device)
-            if use_cuda:
-                # Build per-layer joint-position tensors on GPU.
-                Q_all_torch = []
-                for layer in layers_all:
-                    q_np = np.asarray([s.joint_positions for s in layer], dtype=float)
-                    Q_all_torch.append(torch.as_tensor(q_np, dtype=torch.float64, device=torch_device))
+    torch = _try_import_torch()
+    if torch is not None:
+        torch_device, use_cuda, _note = _resolve_torch_device(torch, device)
+        if use_cuda:
+            # Build per-layer joint-position tensors on GPU.
+            Q_all_torch = []
+            for layer in layers_all:
+                q_np = np.asarray([s.joint_positions for s in layer], dtype=float)
+                Q_all_torch.append(torch.as_tensor(q_np, dtype=torch.float64, device=torch_device))
 
     current_q = np.asarray(start_q, dtype=float)
     segments: List[SegmentResult] = []
@@ -662,8 +648,6 @@ def window_path_receding_horizon(
         requested=str(tm.requested),
         effective=str(tm.effective),
         note=str(tm.note),
-        totg_available=bool(tm.totg_available),
-        totg_failures=int(tm.totg_failures),
     )
 
     return PathResult(
@@ -687,8 +671,7 @@ def global_optimal_path(
 ) -> PathResult:
     """Global method: DP shortest path across all points.
 
-    This method can also use the same CUDA DP backend as the window solver when
-    time_model.effective == 'trapezoid'.
+    This method can also use the same CUDA DP backend as the window solver.
     """
 
     q0 = np.asarray(start_q, dtype=float)
@@ -699,15 +682,14 @@ def global_optimal_path(
 
     # Solve DP indices (use GPU when available).
     Q_all_torch: List[Any] | None = None
-    if str(time_model.info.effective) == "trapezoid":
-        torch = _try_import_torch()
-        if torch is not None:
-            torch_device, use_cuda, _note = _resolve_torch_device(torch, device)
-            if use_cuda:
-                Q_all_torch = []
-                for layer in layers:
-                    q_np = np.asarray([s.joint_positions for s in layer], dtype=float)
-                    Q_all_torch.append(torch.as_tensor(q_np, dtype=torch.float64, device=torch_device))
+    torch = _try_import_torch()
+    if torch is not None:
+        torch_device, use_cuda, _note = _resolve_torch_device(torch, device)
+        if use_cuda:
+            Q_all_torch = []
+            for layer in layers:
+                q_np = np.asarray([s.joint_positions for s in layer], dtype=float)
+                Q_all_torch.append(torch.as_tensor(q_np, dtype=torch.float64, device=torch_device))
 
     if Q_all_torch is not None:
         idxs, _best_time = _optimal_path_indices_dp(
@@ -757,8 +739,6 @@ def global_optimal_path(
         requested=str(tm.requested),
         effective=str(tm.effective),
         note=str(tm.note),
-        totg_available=bool(tm.totg_available),
-        totg_failures=int(tm.totg_failures),
     )
 
     return PathResult(

@@ -11,11 +11,11 @@ from typing import Any, Callable, Dict, List, Sequence, Tuple
 
 import numpy as np
 
-from ..ik.sampler_space import sample_ik_solutions, save_ik_json
+from ..ik.sampler_space import probe_ik_feasibility, sample_ik_solutions, save_ik_json
 from ..ik.robust_sampler import sample_ik_solutions_multi_pass
 from ..planning.origin_time import compute_joint_target_path_time, compute_origin_path_time
 from ..planning.search import window_path_receding_horizon
-from ..planning.time_metric import SegmentTimeModel, TotgSettings
+from ..planning.time_metric import SegmentTimeModel
 from ..types import IKSolution, TargetPoint
 from ..utils.reporting import write_robot_info_txt, write_targets_json
 from ..utils.robot import (
@@ -726,7 +726,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument(
         "--trend-max-step",
         type=float,
-        default=0.30,
+        default=0.25,
         help=(
             "Maximum Cartesian distance (m) between consecutive accepted points in "
             "trend/trend_plus mode. Set <= 0 to disable."
@@ -745,16 +745,12 @@ def _parse_args() -> argparse.Namespace:
         ),
     )
 
-
-    # DP / metric computation device (only affects trapezoid DP; TOTG is CPU)
+    # DP acceleration
     p.add_argument(
         "--device",
         type=str,
         default="auto",
-        help=(
-            "Device for DP when time_model=trapezoid: auto/cpu/cuda/cuda:0... "
-            "(auto uses CUDA if available)."
-        ),
+        help="Device for DP: auto/cpu/cuda/cuda:0... (auto uses CUDA if available).",
     )
     p.add_argument(
         "--dp-block-size",
@@ -777,22 +773,6 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--nullspace-step", type=float, default=0.20, help="Nullspace step (rad).")
     p.add_argument("--nullspace-jitter", type=float, default=0.02, help="Nullspace jitter (rad).")
     p.add_argument("--uniq-resolution", type=float, default=1e-3, help="Uniq quantization (rad).")
-
-    # Segment time model (stop at each waypoint)
-    p.add_argument(
-        "--time-model",
-        type=str,
-        default="trapezoid",
-        choices=["auto", "totg", "trapezoid"],
-        help="Segment time model: auto=prefer MoveIt TOTG, fallback to trapezoid; "
-        "totg=force MoveIt TOTG; trapezoid=analytic rest-to-rest model.",
-    )
-    # TOTG parameters (used when time-model is auto/totg)
-    p.add_argument("--totg-vel-scale", type=float, default=1.0, help="TOTG velocity scaling factor.")
-    p.add_argument("--totg-acc-scale", type=float, default=1.0, help="TOTG acceleration scaling factor.")
-    p.add_argument("--totg-path-tolerance", type=float, default=0.1, help="TOTG path tolerance.")
-    p.add_argument("--totg-resample-dt", type=float, default=0.1, help="TOTG resample dt (s).")
-    p.add_argument("--totg-min-angle-change", type=float, default=0.001, help="TOTG min angle change (rad).")
 
     # Robust sampling / auto-resample (to avoid 0-solution points)
     p.add_argument(
@@ -894,6 +874,7 @@ def main() -> None:
         precheck_spaces = int(args.precheck_num_spaces)
         p0_down_enabled = _as_bool(args.p0_down)
         path_pattern = normalize_path_pattern(str(args.path_pattern))
+        target_sample_max_attempts = 0
         reuse_dir_raw = str(args.reuse_candidates_dir).strip()
         reuse_dir: Path | None = None
         candidate_source_mode = "sampled"
@@ -1100,6 +1081,10 @@ def main() -> None:
                 f"xy_inner_radius={ws.xy_inner_radius:.3f}"
             )
             print(f"[select] trend_max_step = {float(args.trend_max_step):.3f}")
+            target_sample_max_attempts = (
+                4000 if path_pattern in {"trend", "trend_plus"} else 2000
+            )
+            print(f"[select] target_sample_max_attempts = {int(target_sample_max_attempts)}")
 
             @_timed_call
             def _solve_one_point(point_idx_1based: int) -> tuple[TargetPoint, Dict, int]:
@@ -1121,23 +1106,19 @@ def main() -> None:
                         min_separation_m=float(args.min_sep),
                         workspace=ws,
                         trend_max_step_distance_m=float(args.trend_max_step),
-                        max_attempts=2000,
+                        max_attempts=int(target_sample_max_attempts),
                     )
 
-                    # quick feasibility check (fast reject for orientation-infeasible points)
-                    pre_payload = sample_ik_solutions(
+                    # Quick feasibility probe: only ask whether one collision-free IK exists.
+                    pre_payload = probe_ik_feasibility(
                         ctx,
                         target_point=tp,
                         nominal_tip_quat_xyzw=tp.normalized_quat_xyzw(fallback_xyzw=q_nominal),
                         named_start_for_seeding=str(named_start_for_seeding),
-                        num_solutions=50,
                         num_spaces=max(1, min(int(args.num_spaces), int(precheck_spaces))),
-                        max_attempts=max(200, int(precheck_attempts)),
+                        max_attempts=max(50, int(precheck_attempts)),
                         ik_timeout_s=float(args.ik_timeout),
                         yaw_range_rad=float(args.yaw_range),
-                        nullspace_step=float(args.nullspace_step),
-                        nullspace_jitter=float(args.nullspace_jitter),
-                        uniq_resolution_rad=float(args.uniq_resolution),
                         seed=int(args.seed) + 50_000 * point_idx_1based + trial,
                     )
                     pre_found = int(pre_payload.get("meta", {}).get("found", 0))
@@ -1172,7 +1153,7 @@ def main() -> None:
                             "precheck_found": int(pre_found),
                             "precheck_attempts": int(pre_payload.get("meta", {}).get("attempts", 0)),
                             "precheck_ik_successes": int(pre_payload.get("meta", {}).get("ik_successes", 0)),
-                            "precheck_max_attempts": int(max(200, int(precheck_attempts))),
+                            "precheck_max_attempts": int(max(50, int(precheck_attempts))),
                             "precheck_num_spaces": int(max(1, min(int(args.num_spaces), int(precheck_spaces)))),
                         }
                     )
@@ -1269,38 +1250,8 @@ def main() -> None:
 
         def _make_time_model() -> SegmentTimeModel:
             return SegmentTimeModel(
-                model=str(args.time_model),
                 max_vel_rad_s=ctx.velocity_limits,
                 max_acc_rad_s2=ctx.acceleration_limits,
-                moveit_py=ctx.moveit_py,
-                robot_model=ctx.robot_model,
-                group=ctx.group,
-                joint_names=ctx.joint_names,
-                totg_settings=TotgSettings(
-                    vel_scale=float(args.totg_vel_scale),
-                    acc_scale=float(args.totg_acc_scale),
-                    path_tolerance=float(args.totg_path_tolerance),
-                    resample_dt=float(args.totg_resample_dt),
-                    min_angle_change=float(args.totg_min_angle_change),
-                ),
-            )
-
-        def _make_totg_time_model_strict() -> SegmentTimeModel:
-            return SegmentTimeModel(
-                model="totg",
-                max_vel_rad_s=ctx.velocity_limits,
-                max_acc_rad_s2=ctx.acceleration_limits,
-                moveit_py=ctx.moveit_py,
-                robot_model=ctx.robot_model,
-                group=ctx.group,
-                joint_names=ctx.joint_names,
-                totg_settings=TotgSettings(
-                    vel_scale=float(args.totg_vel_scale),
-                    acc_scale=float(args.totg_acc_scale),
-                    path_tolerance=float(args.totg_path_tolerance),
-                    resample_dt=float(args.totg_resample_dt),
-                    min_angle_change=float(args.totg_min_angle_change),
-                ),
             )
 
         def _time_model_info_payload(time_model_obj: SegmentTimeModel) -> Dict:
@@ -1308,69 +1259,7 @@ def main() -> None:
             return {
                 "requested": str(info.requested),
                 "effective": str(info.effective),
-                "totg_available": bool(info.totg_available),
-                "totg_failures": int(info.totg_failures),
                 "note": str(info.note),
-            }
-
-        def _replay_selected_path_with_totg(res) -> Dict:
-            try:
-                replay_time_model = _make_totg_time_model_strict()
-            except Exception as e:
-                return {
-                    "status": "unavailable",
-                    "time_model": {
-                        "requested": "totg",
-                        "effective": "trapezoid",
-                        "totg_available": False,
-                        "totg_failures": 0,
-                        "note": str(e),
-                    },
-                    "segment_times_s": [],
-                    "cumulative_times_s": [],
-                    "segments": [],
-                    "total_time_s": 0.0,
-                    "note": f"TOTG replay unavailable: {e}",
-                }
-
-            current_q = [float(v) for v in start_q]
-            segment_times: List[float] = []
-            segments: List[Dict] = []
-            for seg in res.segments:
-                next_q = [float(v) for v in seg.best_solution.joint_positions]
-                dt = float(replay_time_model.segment_time_s(current_q, next_q))
-                segment_times.append(float(dt))
-                segments.append(
-                    {
-                        "from": str(seg.from_label),
-                        "to": str(seg.to_label),
-                        "time_s": float(dt),
-                        "solution_index_0based": int(seg.best_solution.index),
-                        "solution_index_1based": int(seg.best_solution.index) + 1,
-                        "solution_id": f"p{seg.seg_idx_1based}_{int(seg.best_solution.index)+1}",
-                        "attempt": int(seg.best_solution.attempt),
-                        "joint_positions": [float(v) for v in seg.best_solution.joint_positions],
-                    }
-                )
-                current_q = list(next_q)
-
-            cumulative = [float(v) for v in np.cumsum(np.asarray(segment_times, dtype=float))]
-            tm_info = _time_model_info_payload(replay_time_model)
-            totg_failures = int(tm_info["totg_failures"])
-            status = "ok" if totg_failures <= 0 else "ok_with_fallback"
-            note = (
-                "Replay timing of trapezoid-selected solutions using TOTG."
-                if status == "ok"
-                else "Replay timing used TOTG, but some segments fell back to trapezoid after TOTG runtime failure."
-            )
-            return {
-                "status": str(status),
-                "time_model": dict(tm_info),
-                "segment_times_s": [float(v) for v in segment_times],
-                "cumulative_times_s": cumulative,
-                "segments": segments,
-                "total_time_s": float(sum(segment_times)),
-                "note": str(note),
             }
 
         def _replay_selected_path_with_true_planner(res) -> Dict:
@@ -1432,7 +1321,6 @@ def main() -> None:
         # 6) Policy evaluation (window search)
         # For this package, one run evaluates ONLY the requested window_size(s).
         time_model = _make_time_model()
-        evaluate_trapezoid_solutions_with_totg = str(time_model.info.effective) == "trapezoid"
 
         def _path_segments_payload(res) -> List[Dict]:
             return [
@@ -1581,8 +1469,6 @@ def main() -> None:
         window_total_time_s_by_ws: Dict[str, float] = {}
         window_selection_timing_by_ws: Dict[str, List[Dict]] = {}
         window_selection_timing_total_s_by_ws: Dict[str, float] = {}
-        trapezoid_solutions_totg_results_by_ws: Dict[str, Dict] = {}
-        trapezoid_solutions_totg_total_time_s_by_ws: Dict[str, float] = {}
         trapezoid_solutions_true_plan_results_by_ws: Dict[str, Dict] = {}
         trapezoid_solutions_true_plan_total_time_s_by_ws: Dict[str, float] = {}
 
@@ -1623,44 +1509,25 @@ def main() -> None:
                 },
             }
 
-            if evaluate_trapezoid_solutions_with_totg:
-                print("[eval] replay selected solutions with TOTG timing ...")
-                replay_payload = _replay_selected_path_with_totg(res)
-                replay_payload_with_ws = dict(replay_payload)
-                replay_payload_with_ws["window_size"] = int(ws)
-                trapezoid_solutions_totg_results_by_ws[str(ws)] = dict(replay_payload_with_ws)
-                trapezoid_solutions_totg_total_time_s_by_ws[str(ws)] = float(replay_payload["total_time_s"])
-                if str(replay_payload.get("status", "")) == "ok":
-                    print(
-                        "[eval] trapezoid_solutions_totg total_time_s = "
-                        f"{float(replay_payload['total_time_s']):.6f}"
-                    )
-                else:
-                    print(
-                        "[eval] WARN trapezoid_solutions_totg status="
-                        f"{str(replay_payload.get('status', 'unknown'))}: "
-                        f"{str(replay_payload.get('note', ''))}"
-                    )
-
-                print("[eval] replay selected solutions with true planner timing ...")
-                replay_true_payload = _replay_selected_path_with_true_planner(res)
-                replay_true_payload_with_ws = dict(replay_true_payload)
-                replay_true_payload_with_ws["window_size"] = int(ws)
-                trapezoid_solutions_true_plan_results_by_ws[str(ws)] = dict(replay_true_payload_with_ws)
-                trapezoid_solutions_true_plan_total_time_s_by_ws[str(ws)] = float(
-                    replay_true_payload.get("total_time_s", 0.0)
+            print("[eval] replay selected solutions with true planner timing ...")
+            replay_true_payload = _replay_selected_path_with_true_planner(res)
+            replay_true_payload_with_ws = dict(replay_true_payload)
+            replay_true_payload_with_ws["window_size"] = int(ws)
+            trapezoid_solutions_true_plan_results_by_ws[str(ws)] = dict(replay_true_payload_with_ws)
+            trapezoid_solutions_true_plan_total_time_s_by_ws[str(ws)] = float(
+                replay_true_payload.get("total_time_s", 0.0)
+            )
+            if str(replay_true_payload.get("status", "")) == "ok":
+                print(
+                    "[eval] trapezoid_solutions_true_plan total_time_s = "
+                    f"{float(replay_true_payload['total_time_s']):.6f}"
                 )
-                if str(replay_true_payload.get("status", "")) == "ok":
-                    print(
-                        "[eval] trapezoid_solutions_true_plan total_time_s = "
-                        f"{float(replay_true_payload['total_time_s']):.6f}"
-                    )
-                else:
-                    print(
-                        "[eval] WARN trapezoid_solutions_true_plan status="
-                        f"{str(replay_true_payload.get('status', 'unknown'))}: "
-                        f"{str(replay_true_payload.get('note', ''))}"
-                    )
+            else:
+                print(
+                    "[eval] WARN trapezoid_solutions_true_plan status="
+                    f"{str(replay_true_payload.get('status', 'unknown'))}: "
+                    f"{str(replay_true_payload.get('note', ''))}"
+                )
 
         # Build unified summary.json (keeps the same overall structure as panda_ik_global_window,
         # but records results by window_size instead of separate greedy/global/window blocks).
@@ -1691,7 +1558,7 @@ def main() -> None:
 
         summary = {
             "format": "panda_ik_window_summary",
-            "format_version": 4,
+            "format_version": 5,
             "meta": {
                 "timestamp": str(data_paths.timestamp),
                 "seed": int(args.seed),
@@ -1702,6 +1569,7 @@ def main() -> None:
                 "num_solutions": int(requested),
                 "path_pattern": str(path_pattern),
                 "trend_max_step_m": float(args.trend_max_step),
+                "target_sample_max_attempts": int(target_sample_max_attempts),
                 "workspace": {
                     "x": [float(args.ws_x[0]), float(args.ws_x[1])],
                     "y": [float(args.ws_y[0]), float(args.ws_y[1])],
@@ -1711,13 +1579,7 @@ def main() -> None:
                 },
                 "candidate_source_mode": str(candidate_source_mode),
                 "reuse_candidates_dir": str(reuse_dir) if reuse_dir is not None else "",
-                "time_model": {
-                    "requested": str(time_model.info.requested),
-                    "effective": str(time_model.info.effective),
-                    "totg_available": bool(time_model.info.totg_available),
-                    "totg_failures": int(time_model.info.totg_failures),
-                    "note": str(time_model.info.note),
-                },
+                "time_model": dict(_time_model_info_payload(time_model)),
                 # New in v3:
                 "window_size_input": str(window_size_input),
                 "window_size_requested": window_size_requested_field,
@@ -1762,52 +1624,17 @@ def main() -> None:
                 "planning_elapsed_total_s": float(origin_result.planning_elapsed_total_s),
                 "note": str(origin_result.note),
             },
-            "trapezoid_solutions_totg": {
-                "enabled": bool(evaluate_trapezoid_solutions_with_totg),
-                "status": (
-                    "not_applicable"
-                    if not evaluate_trapezoid_solutions_with_totg
-                    else (
-                        "ok"
-                        if all(
-                            str(v.get("status", "")) == "ok"
-                            for v in trapezoid_solutions_totg_results_by_ws.values()
-                        )
-                        else "partial"
-                    )
-                ),
-                "note": (
-                    "Only generated when selected solutions are chosen by trapezoid timing."
-                    if not evaluate_trapezoid_solutions_with_totg
-                    else "Replay timing for trapezoid-selected solutions computed with TOTG."
-                ),
-                "total_time_s_by_ws": dict(trapezoid_solutions_totg_total_time_s_by_ws),
-                "results_by_ws": dict(trapezoid_solutions_totg_results_by_ws),
-                "results": [
-                    dict(trapezoid_solutions_totg_results_by_ws[str(ws)])
-                    for ws in ws_list
-                    if str(ws) in trapezoid_solutions_totg_results_by_ws
-                ],
-            },
             "trapezoid_solutions_true_plan": {
-                "enabled": bool(evaluate_trapezoid_solutions_with_totg),
+                "enabled": True,
                 "status": (
-                    "not_applicable"
-                    if not evaluate_trapezoid_solutions_with_totg
-                    else (
-                        "ok"
-                        if all(
-                            str(v.get("status", "")) == "ok"
-                            for v in trapezoid_solutions_true_plan_results_by_ws.values()
-                        )
-                        else "partial"
+                    "ok"
+                    if all(
+                        str(v.get("status", "")) == "ok"
+                        for v in trapezoid_solutions_true_plan_results_by_ws.values()
                     )
+                    else "partial"
                 ),
-                "note": (
-                    "Only generated when selected solutions are chosen by trapezoid timing."
-                    if not evaluate_trapezoid_solutions_with_totg
-                    else "Replay timing for trapezoid-selected solutions computed by true planner point-to-point calls."
-                ),
+                "note": "Planner replay for trapezoid-selected solutions using point-to-point joint planning.",
                 "total_time_s_by_ws": dict(trapezoid_solutions_true_plan_total_time_s_by_ws),
                 "results_by_ws": dict(trapezoid_solutions_true_plan_results_by_ws),
                 "results": [
@@ -1842,6 +1669,7 @@ def main() -> None:
         txt_lines.append(f"seed: {int(args.seed)}")
         txt_lines.append(f"path_pattern: {path_pattern}")
         txt_lines.append(f"trend_max_step_m: {float(args.trend_max_step):.3f}")
+        txt_lines.append(f"target_sample_max_attempts: {int(target_sample_max_attempts)}")
         txt_lines.append(
             "workspace: "
             f"x[{float(args.ws_x[0]):.3f}, {float(args.ws_x[1]):.3f}] "

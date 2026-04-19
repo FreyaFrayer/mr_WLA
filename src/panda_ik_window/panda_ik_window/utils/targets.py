@@ -21,6 +21,8 @@ _SWITCH_CONSEC_COS_MAX = -0.8
 _TREND_PLUS_MIN_STREAK = 3
 _TREND_PLUS_STREAK_VARIANTS = 3  # 3/4/5 trend points then force a switch
 _TREND_PLUS_SAFE_MARGIN_RATIO = 0.20
+_TREND_CANDIDATE_POOL_TARGET = 12
+_TREND_CANDIDATE_POOL_ATTEMPT_FLOOR = 120
 _EPS = 1e-9
 
 
@@ -328,6 +330,144 @@ def _euclidean(a: TargetPoint, b: TargetPoint) -> float:
     return float((dx * dx + dy * dy + dz * dz) ** 0.5)
 
 
+def _point_xyz(p: TargetPoint) -> np.ndarray:
+    return np.asarray([float(p.x), float(p.y), float(p.z)], dtype=float)
+
+
+def _unit_or_none(v: np.ndarray) -> Optional[np.ndarray]:
+    n = float(np.linalg.norm(v))
+    if n <= _EPS:
+        return None
+    return (v / n).reshape((-1,))
+
+
+def _trend_reference_direction(history: Sequence[TargetPoint]) -> Optional[np.ndarray]:
+    if len(history) < 2:
+        return None
+
+    xyz = np.asarray([_point_xyz(p) for p in history], dtype=float)
+    steps = np.diff(xyz, axis=0)
+    if steps.shape[0] <= 0:
+        return None
+
+    weights = np.linspace(1.0, 2.5, steps.shape[0], dtype=float).reshape((-1, 1))
+    ref = np.sum(steps * weights, axis=0)
+    unit = _unit_or_none(ref)
+    if unit is not None:
+        return unit
+
+    for step in reversed(steps):
+        unit = _unit_or_none(step)
+        if unit is not None:
+            return unit
+    return None
+
+
+def _trend_reference_orientation(
+    *,
+    path_anchor: Optional[TargetPoint],
+    existing_points: Sequence[TargetPoint],
+) -> Optional[tuple[float, float, float, float]]:
+    if path_anchor is not None:
+        return tuple(path_anchor.normalized_quat_xyzw())
+    if len(existing_points) > 0:
+        return tuple(existing_points[-1].normalized_quat_xyzw())
+    return None
+
+
+def _trend_stabilize_orientation(
+    *,
+    sampled_point: TargetPoint,
+    path_anchor: Optional[TargetPoint],
+    existing_points: Sequence[TargetPoint],
+) -> TargetPoint:
+    ref_q = _trend_reference_orientation(path_anchor=path_anchor, existing_points=existing_points)
+    if ref_q is None:
+        return sampled_point
+    return sampled_point.with_orientation(ref_q)
+
+
+def _trend_target_step_distance(
+    *,
+    history: Sequence[TargetPoint],
+    min_separation_m: float,
+    max_step_distance_m: float,
+) -> float:
+    min_sep = float(max(0.0, min_separation_m))
+    max_step = float(max_step_distance_m)
+    lower = max(0.10, 1.5 * min_sep)
+
+    if len(history) < 2:
+        if max_step > 0.0:
+            return min(max_step * 0.75, max(lower, 0.18))
+        return max(lower, 0.18)
+
+    xyz = np.asarray([_point_xyz(p) for p in history], dtype=float)
+    d = np.diff(xyz, axis=0)
+    norms = np.linalg.norm(d, axis=1)
+    if norms.size <= 0:
+        if max_step > 0.0:
+            return min(max_step * 0.75, max(lower, 0.18))
+        return max(lower, 0.18)
+
+    recent = norms[-3:] if norms.shape[0] >= 3 else norms
+    target = float(np.median(recent))
+    target = max(lower, target)
+    if max_step > 0.0:
+        target = min(max_step * 0.85, target)
+    return float(target)
+
+
+def _trend_candidate_score(
+    *,
+    history: Sequence[TargetPoint],
+    candidate: TargetPoint,
+    workspace: WorkspaceBounds,
+    min_separation_m: float,
+    max_step_distance_m: float,
+) -> float:
+    if len(history) <= 0:
+        edge_score = workspace.xy_edge_score(candidate)
+        return float(2.0 * (1.0 - edge_score) + (1.0 if workspace.in_safe_zone(candidate) else 0.0))
+
+    last = history[-1]
+    step = _point_xyz(candidate) - _point_xyz(last)
+    step_norm = float(np.linalg.norm(step))
+    if step_norm <= _EPS:
+        return -1e9
+
+    score = 0.0
+
+    ref_dir = _trend_reference_direction(history)
+    if ref_dir is not None:
+        score += 4.0 * float(np.dot(step / step_norm, ref_dir))
+
+    if workspace.in_danger_zone(last):
+        cx, cy = workspace.xy_center()
+        inward = np.asarray([cx - float(last.x), cy - float(last.y)], dtype=float)
+        inward_unit = _unit_or_none(inward)
+        step_xy_unit = _unit_or_none(step[:2])
+        if inward_unit is not None and step_xy_unit is not None:
+            score += 2.5 * float(np.dot(step_xy_unit, inward_unit))
+
+    target_step = _trend_target_step_distance(
+        history=history,
+        min_separation_m=min_separation_m,
+        max_step_distance_m=max_step_distance_m,
+    )
+    step_scale = max(0.05, float(max_step_distance_m) if float(max_step_distance_m) > 0.0 else target_step)
+    score -= abs(step_norm - target_step) / step_scale
+
+    edge_score = workspace.xy_edge_score(candidate)
+    score += 2.0 * (1.0 - edge_score)
+    if workspace.in_safe_zone(candidate):
+        score += 1.5
+    elif workspace.in_danger_zone(candidate):
+        score -= 1.0
+
+    return float(score)
+
+
 def _trend_step_is_valid(
     *,
     history: Sequence[TargetPoint],
@@ -376,6 +516,8 @@ def sample_one_reachable_point_fk(
     - We use a NumPy RNG to keep reproducibility stable.
     - Minimal separation to previously accepted points is enforced.
     - `path_pattern` supports: trend / switching / random / trend_plus.
+    - `trend` and `trend_plus` keep a small candidate pool and choose the
+      best-scored continuation instead of accepting the first valid random hit.
     """
     workspace = workspace or WorkspaceBounds()
     pattern = normalize_path_pattern(path_pattern)
@@ -386,7 +528,18 @@ def sample_one_reachable_point_fk(
     if lows.shape[0] != highs.shape[0] or int(lows.shape[0]) != int(ctx.dof):
         raise RuntimeError("Joint limit shape mismatch; cannot sample FK points reliably.")
 
-    for _ in range(int(max_attempts)):
+    history: List[TargetPoint] = []
+    if path_anchor is not None:
+        history.append(path_anchor)
+    history.extend(existing_points)
+
+    collect_trend_candidates = pattern in {"trend", "trend_plus"}
+    best_trend_candidate: Optional[tuple[float, TargetPoint]] = None
+    trend_candidate_count = 0
+    pool_target = max(4, min(_TREND_CANDIDATE_POOL_TARGET, int(max_attempts)))
+    attempt_floor = min(int(max_attempts), max(pool_target, _TREND_CANDIDATE_POOL_ATTEMPT_FLOOR))
+
+    for attempt_idx in range(int(max_attempts)):
         q = rng.uniform(lows, highs).astype(float).tolist()
 
         state = RobotState(ctx.robot_model)
@@ -407,6 +560,13 @@ def sample_one_reachable_point_fk(
                 float(pose.orientation.w),
             )
         )
+
+        if collect_trend_candidates:
+            p = _trend_stabilize_orientation(
+                sampled_point=p,
+                path_anchor=path_anchor,
+                existing_points=existing_points,
+            )
 
         if not workspace.contains(p):
             continue
@@ -429,7 +589,30 @@ def sample_one_reachable_point_fk(
         ):
             continue
 
+        if collect_trend_candidates:
+            score = _trend_candidate_score(
+                history=history,
+                candidate=p,
+                workspace=workspace,
+                min_separation_m=float(min_separation_m),
+                max_step_distance_m=float(trend_max_step_distance_m),
+            )
+            if best_trend_candidate is None or score > best_trend_candidate[0]:
+                best_trend_candidate = (float(score), p)
+            trend_candidate_count += 1
+
+            if (
+                trend_candidate_count >= pool_target
+                and (attempt_idx + 1) >= attempt_floor
+                and best_trend_candidate is not None
+            ):
+                return best_trend_candidate[1]
+            continue
+
         return p
+
+    if best_trend_candidate is not None:
+        return best_trend_candidate[1]
 
     raise RuntimeError(
         f"Failed to sample a FK-reachable point within {max_attempts} attempts "

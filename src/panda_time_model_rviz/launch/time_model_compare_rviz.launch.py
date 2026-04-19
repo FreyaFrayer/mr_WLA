@@ -152,16 +152,16 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument(
                 "seed_dir",
                 default_value="data_window/batch_time_model_data/np3/seed11",
-                description="Seed root directory containing model_totg/model_trapezoid subdirectories.",
+                description="Seed root directory containing model_a/model_b subdirectories.",
             ),
             DeclareLaunchArgument(
                 "model_a_dir",
-                default_value="model_totg",
+                default_value="model_a",
                 description="Subdirectory name under seed_dir for model A.",
             ),
             DeclareLaunchArgument(
                 "model_b_dir",
-                default_value="model_trapezoid",
+                default_value="model_b",
                 description="Subdirectory name under seed_dir for model B.",
             ),
             DeclareLaunchArgument(

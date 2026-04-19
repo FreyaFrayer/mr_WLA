@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Compare two time-model selection results under one seed folder in RViz2.
+"""Compare two selection results under one seed folder in RViz2.
 
 Input layout example:
   seed11/
-    model_totg/<timestamp>/summary.json
-    model_trapezoid/<timestamp>/summary.json
+    model_a/<timestamp>/summary.json
+    model_b/<timestamp>/summary.json
 
 This node resolves the latest run under each model directory, extracts one shared
 window-size final_path, publishes two JointState streams, and overlays path markers.
@@ -25,6 +25,7 @@ import rclpy
 from geometry_msgs.msg import Point, TransformStamped
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+from tf2_ros import Buffer, TransformListener
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
 from visualization_msgs.msg import Marker, MarkerArray
 
@@ -336,12 +337,13 @@ class TimeModelComparePlayer(Node):
         super().__init__("time_model_compare_player")
 
         self.declare_parameter("seed_dir", "data_window/batch_time_model_data/np3/seed11")
-        self.declare_parameter("model_a_dir", "model_totg")
-        self.declare_parameter("model_b_dir", "model_trapezoid")
+        self.declare_parameter("model_a_dir", "model_a")
+        self.declare_parameter("model_b_dir", "model_b")
         self.declare_parameter("window_size", -1)
 
         self.declare_parameter("fixed_frame", "world")
         self.declare_parameter("root_link", "panda_link0")
+        self.declare_parameter("ee_link", "panda_hand")
         self.declare_parameter("model_a_prefix", "model_a_/")
         self.declare_parameter("model_b_prefix", "model_b_/")
         self.declare_parameter("model_a_label", "")
@@ -373,6 +375,7 @@ class TimeModelComparePlayer(Node):
 
         self.fixed_frame = str(self.get_parameter("fixed_frame").value)
         self.root_link = str(self.get_parameter("root_link").value)
+        self.ee_link = str(self.get_parameter("ee_link").value)
         self.model_a_prefix = str(self.get_parameter("model_a_prefix").value)
         self.model_b_prefix = str(self.get_parameter("model_b_prefix").value)
 
@@ -484,15 +487,20 @@ class TimeModelComparePlayer(Node):
 
         self.static_tf = StaticTransformBroadcaster(self)
         self._publish_static_tf()
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
         self._t_abs = 0.0
         self._last_tick = self.get_clock().now()
         self._cycle_time = float(max(self.model_a_traj.total_time, self.model_b_traj.total_time))
+        self._p0_xyz_model_a: Optional[Tuple[float, float, float]] = None
+        self._p0_xyz_model_b: Optional[Tuple[float, float, float]] = None
 
         self._marker_msg = self._make_marker_array()
 
         self._play_timer = self.create_timer(self.dt, self._on_timer)
         self._marker_timer = self.create_timer(1.0, self._on_marker_timer)
+        self._try_p0_timer = self.create_timer(0.2, self._try_compute_p0)
 
         self._publish_joint_state(self.js_pub_a, self.model_a_traj, 0)
         self._publish_joint_state(self.js_pub_b, self.model_b_traj, 0)
@@ -600,6 +608,7 @@ class TimeModelComparePlayer(Node):
             prefix=self.model_a_prefix,
             ns_prefix="model_a",
             order=self._ordered_names_for(self.model_a_order),
+            p0_xyz=self._p0_xyz_model_a,
             rgba=self.model_a_rgba,
             id_base=1000,
         )
@@ -609,6 +618,7 @@ class TimeModelComparePlayer(Node):
             prefix=self.model_b_prefix,
             ns_prefix="model_b",
             order=self._ordered_names_for(self.model_b_order),
+            p0_xyz=self._p0_xyz_model_b,
             rgba=self.model_b_rgba,
             id_base=2000,
         )
@@ -649,11 +659,48 @@ class TimeModelComparePlayer(Node):
         prefix: str,
         ns_prefix: str,
         order: Sequence[str],
+        p0_xyz: Optional[Tuple[float, float, float]],
         rgba: Tuple[float, float, float, float],
         id_base: int,
     ) -> None:
         frame = f"{prefix}{self.root_link}"
         line_points: List[Tuple[float, float, float]] = []
+
+        if p0_xyz is not None:
+            line_points.append(p0_xyz)
+
+            sphere = Marker()
+            sphere.header.stamp = now
+            sphere.header.frame_id = frame
+            sphere.ns = f"{ns_prefix}_points"
+            sphere.id = int(id_base)
+            sphere.type = Marker.SPHERE
+            sphere.action = Marker.ADD
+            sphere.pose.position.x = p0_xyz[0]
+            sphere.pose.position.y = p0_xyz[1]
+            sphere.pose.position.z = p0_xyz[2]
+            sphere.pose.orientation.w = 1.0
+            sphere.scale.x = self.point_scale
+            sphere.scale.y = self.point_scale
+            sphere.scale.z = self.point_scale
+            sphere.color.r, sphere.color.g, sphere.color.b, sphere.color.a = rgba
+            ma.markers.append(sphere)
+
+            label = Marker()
+            label.header.stamp = now
+            label.header.frame_id = frame
+            label.ns = f"{ns_prefix}_labels"
+            label.id = int(id_base + 500)
+            label.type = Marker.TEXT_VIEW_FACING
+            label.action = Marker.ADD
+            label.pose.position.x = p0_xyz[0]
+            label.pose.position.y = p0_xyz[1]
+            label.pose.position.z = p0_xyz[2] + self.label_dz
+            label.pose.orientation.w = 1.0
+            label.scale.z = self.label_scale_z
+            label.color.r, label.color.g, label.color.b, label.color.a = rgba
+            label.text = "0:p0"
+            ma.markers.append(label)
 
         for idx, name in enumerate(order, start=1):
             target = self.targets_by_name.get(name)
@@ -753,6 +800,64 @@ class TimeModelComparePlayer(Node):
         for m in self._marker_msg.markers:
             m.header.stamp = now
         self.marker_pub.publish(self._marker_msg)
+
+    def _lookup_p0_in_base_frame(
+        self, prefix: str
+    ) -> Optional[Tuple[float, float, float]]:
+        base_frame = f"{prefix}{self.root_link}"
+        ee_frame = f"{prefix}{self.ee_link}"
+        try:
+            tf = self.tf_buffer.lookup_transform(base_frame, ee_frame, rclpy.time.Time())
+        except Exception:
+            return None
+
+        tr = tf.transform.translation
+        return (float(tr.x), float(tr.y), float(tr.z))
+
+    def _try_compute_p0(self) -> None:
+        if self._p0_xyz_model_a is not None and self._p0_xyz_model_b is not None:
+            self._try_p0_timer.cancel()
+            return
+
+        try:
+            if self.model_a_traj.samples:
+                self._publish_joint_state(self.js_pub_a, self.model_a_traj, 0)
+            if self.model_b_traj.samples:
+                self._publish_joint_state(self.js_pub_b, self.model_b_traj, 0)
+
+            updated = False
+
+            if self._p0_xyz_model_a is None:
+                p0_a = self._lookup_p0_in_base_frame(self.model_a_prefix)
+                if p0_a is not None:
+                    self._p0_xyz_model_a = p0_a
+                    updated = True
+                    self.get_logger().info(
+                        f"Computed p0 for {self.model_a_label}: {self._p0_xyz_model_a}"
+                    )
+
+            if self._p0_xyz_model_b is None:
+                p0_b = self._lookup_p0_in_base_frame(self.model_b_prefix)
+                if p0_b is not None:
+                    self._p0_xyz_model_b = p0_b
+                    updated = True
+                    self.get_logger().info(
+                        f"Computed p0 for {self.model_b_label}: {self._p0_xyz_model_b}"
+                    )
+
+            if updated:
+                self._marker_msg = self._make_marker_array()
+                self.marker_pub.publish(self._marker_msg)
+
+            if self._p0_xyz_model_a is not None and self._p0_xyz_model_b is not None:
+                self._try_p0_timer.cancel()
+        finally:
+            if self.model_a_traj.samples:
+                idx_a = int(self._time_for_traj(self.model_a_traj.total_time) / self.model_a_traj.dt)
+                self._publish_joint_state(self.js_pub_a, self.model_a_traj, idx_a)
+            if self.model_b_traj.samples:
+                idx_b = int(self._time_for_traj(self.model_b_traj.total_time) / self.model_b_traj.dt)
+                self._publish_joint_state(self.js_pub_b, self.model_b_traj, idx_b)
 
 
 def main(args: Optional[Sequence[str]] = None) -> None:

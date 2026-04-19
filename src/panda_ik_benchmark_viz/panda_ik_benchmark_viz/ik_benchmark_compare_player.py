@@ -18,7 +18,7 @@ Additionally, it publishes static TF transforms to place the two robots:
 
 This node does NOT require MoveIt. It interpolates joint positions between waypoints using
 smooth quintic time-scaling (zero vel/acc at segment endpoints), using segment durations
-from summary.json (e.g., TOTG timing results).
+from summary.json.
 
 Looping modes:
 - Independent looping (default): each trajectory loops with its own period.

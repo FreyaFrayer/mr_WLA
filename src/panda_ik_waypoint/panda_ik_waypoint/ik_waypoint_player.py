@@ -27,6 +27,7 @@ import rclpy
 from geometry_msgs.msg import Point, TransformStamped
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
+from tf2_ros import Buffer, TransformListener
 from tf2_ros.static_transform_broadcaster import StaticTransformBroadcaster
 from visualization_msgs.msg import Marker, MarkerArray
 
@@ -222,6 +223,7 @@ class IKWaypointPlayer(Node):
         # Frame / robot layout
         self.declare_parameter("fixed_frame", "world")
         self.declare_parameter("root_link", "panda_link0")
+        self.declare_parameter("ee_link", "panda_hand")
         self.declare_parameter("robot_prefix", "waypoint_/")
         self.declare_parameter("base_offset_xyz", [0.0, 0.0, 0.0])
 
@@ -263,6 +265,7 @@ class IKWaypointPlayer(Node):
 
         self.fixed_frame = str(self.get_parameter("fixed_frame").value)
         self.root_link = str(self.get_parameter("root_link").value)
+        self.ee_link = str(self.get_parameter("ee_link").value)
         self.robot_prefix = str(self.get_parameter("robot_prefix").value)
         self.base_offset = [float(v) for v in list(self.get_parameter("base_offset_xyz").value)]
 
@@ -356,14 +359,18 @@ class IKWaypointPlayer(Node):
         # Static TF for base placement
         self.static_tf = StaticTransformBroadcaster(self)
         self._publish_static_tf()
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
         # Runtime state
         self._elapsed_s = 0.0
         self._last_tick = self.get_clock().now()
+        self._p0_xyz_base: Optional[Tuple[float, float, float]] = None
 
         # Timers
         self._play_timer = self.create_timer(self.dt, self._on_timer)
         self._marker_timer = self.create_timer(1.0, self._on_marker_timer)
+        self._try_p0_timer = self.create_timer(0.2, self._try_compute_p0)
 
         # Initial publish
         self._publish_joint_state(self.traj.evaluate(0.0))
@@ -416,6 +423,38 @@ class IKWaypointPlayer(Node):
             return names_in_path
         return sorted(self.targets_by_name.keys(), key=_sort_point_name_key)
 
+    def _current_playback_time(self) -> float:
+        if self.traj.total_s <= 1e-9:
+            return 0.0
+        if self.loop:
+            return self._elapsed_s % self.traj.total_s
+        return min(self._elapsed_s, self.traj.total_s)
+
+    def _try_compute_p0(self) -> None:
+        if self._p0_xyz_base is not None:
+            self._try_p0_timer.cancel()
+            return
+
+        base_frame = f"{self.robot_prefix}{self.root_link}"
+        ee_frame = f"{self.robot_prefix}{self.ee_link}"
+        current_q = self.traj.evaluate(self._current_playback_time())
+
+        try:
+            self._publish_joint_state(self.traj.evaluate(0.0))
+            tf = self.tf_buffer.lookup_transform(base_frame, ee_frame, rclpy.time.Time())
+            tr = tf.transform.translation
+            self._p0_xyz_base = (float(tr.x), float(tr.y), float(tr.z))
+            self.get_logger().info(
+                f"Computed p0 from TF: {ee_frame} in {base_frame} => {self._p0_xyz_base}"
+            )
+            self._marker_msg = self._make_marker_array()
+            self.marker_pub.publish(self._marker_msg)
+            self._try_p0_timer.cancel()
+        except Exception:
+            return
+        finally:
+            self._publish_joint_state(current_q)
+
     def _make_marker_array(self) -> MarkerArray:
         ma = MarkerArray()
         now = self.get_clock().now().to_msg()
@@ -430,6 +469,42 @@ class IKWaypointPlayer(Node):
 
         ordered_names = self._ordered_target_names()
         line_points: List[Tuple[float, float, float]] = []
+
+        if self._p0_xyz_base is not None:
+            line_points.append(self._p0_xyz_base)
+
+            sphere = Marker()
+            sphere.header.stamp = now
+            sphere.header.frame_id = frame
+            sphere.ns = "ik_waypoint_points"
+            sphere.id = 1000
+            sphere.type = Marker.SPHERE
+            sphere.action = Marker.ADD
+            sphere.pose.position.x = self._p0_xyz_base[0]
+            sphere.pose.position.y = self._p0_xyz_base[1]
+            sphere.pose.position.z = self._p0_xyz_base[2]
+            sphere.pose.orientation.w = 1.0
+            sphere.scale.x = self.point_scale
+            sphere.scale.y = self.point_scale
+            sphere.scale.z = self.point_scale
+            sphere.color.r, sphere.color.g, sphere.color.b, sphere.color.a = self.point_rgba
+            ma.markers.append(sphere)
+
+            label = Marker()
+            label.header.stamp = now
+            label.header.frame_id = frame
+            label.ns = "ik_waypoint_labels"
+            label.id = 2000
+            label.type = Marker.TEXT_VIEW_FACING
+            label.action = Marker.ADD
+            label.pose.position.x = self._p0_xyz_base[0]
+            label.pose.position.y = self._p0_xyz_base[1]
+            label.pose.position.z = self._p0_xyz_base[2] + self.label_dz
+            label.pose.orientation.w = 1.0
+            label.scale.z = self.label_scale_z
+            label.color.r, label.color.g, label.color.b, label.color.a = self.label_rgba
+            label.text = "0:p0"
+            ma.markers.append(label)
 
         for idx, pname in enumerate(ordered_names, start=1):
             t = self.targets_by_name.get(pname)
@@ -532,11 +607,7 @@ class IKWaypointPlayer(Node):
             self._publish_joint_state(q)
             return
 
-        if self.loop:
-            t = self._elapsed_s % self.traj.total_s
-        else:
-            t = min(self._elapsed_s, self.traj.total_s)
-
+        t = self._current_playback_time()
         q = self.traj.evaluate(t)
         self._publish_joint_state(q)
 

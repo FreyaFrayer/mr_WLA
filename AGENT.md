@@ -29,7 +29,7 @@
 这个仓库不是在线控制器。它更像是：
 - 离线数据生成工具
 - 轨迹选择策略评测器
-- 不同时间模型（TOTG / trapezoid）的比较平台
+- 基于梯形时间模型的窗口策略评测平台
 
 ---
 
@@ -202,8 +202,6 @@ src/panda_ik_window/panda_ik_window/planning/search.py
 - CUDA 可用
 - `time_model.info.effective == "trapezoid"`
 
-`TOTG` 仍然走 CPU，且 `segment_time_matrix_s(...)` 在 TOTG 下是双层循环，比较慢。这是当前设计，不是 bug。
-
 ### 4.6 默认起始状态是“按 seed 确定的随机关节状态”
 
 如果：
@@ -263,19 +261,15 @@ src/panda_ik_window/panda_ik_window/scripts/run_benchmark.py
 当前支持：
 
 - `trapezoid`
-- `totg`
-- `auto`
 
 其中：
 
 - `trapezoid` 是解析型、快、可向量化。
-- `totg` 调 MoveIt 的时间参数化，CPU、慢、但更贴近 MoveIt 行为。
-- `auto` 会优先 TOTG，失败后回退到 trapezoid。
 
 若你修改时间模型：
 
 - 保持 `SegmentTimeModel.segment_time_s(...)` 与 `segment_time_matrix_s(...)` 语义一致。
-- 若新增模型，记得更新 CLI `choices` 和 summary 的 `meta.time_model`。
+- 若调整 summary 结构，记得同步更新 `meta.time_model`。
 
 ### 5.4 `ik/sampler_space.py`
 
@@ -453,7 +447,6 @@ python3 script/batch_ik_window.py --num-points 8 --seeds 7,8,9
 
 1. **IK 采样慢**：看 `sampler_space.py` / `robust_sampler.py`
 2. **DP 慢**：看 `planning/search.py`
-3. **TOTG 慢**：这是预期现象，不要误以为是简单 bug
 
 当前最容易带来收益的方向通常是：
 
@@ -632,11 +625,9 @@ python3 script/batch_ik_window.py --num-points 3 --seeds 7
 - 改 `window` 语义
 - 改 IK 去重规则
 - 改路径模式判别阈值
-- 改 TOTG 与 trapezoid 的切换逻辑
 
 ### 不建议默认去做的事
 
-- 无依据地把 TOTG 路径改成 GPU
 - 删除兼容字段
 - 把严格报错改成静默降级
 - 仅凭“代码看起来重复”就合并 batch 脚本而不验证
@@ -651,7 +642,6 @@ python3 script/batch_ik_window.py --num-points 3 --seeds 7
 2. 顶层有两个 batch 脚本，功能部分重叠。
 3. 仓库里带有 `__MACOSX`、`.DS_Store`、`__pycache__` 等非源码内容。
 4. 文档中的 path pattern 定义与代码阈值可能并非完全同步。
-5. TOTG 路径天然较慢，若做大规模 sweep，容易让人误判为“程序卡住”。
 
 ---
 

@@ -12,19 +12,22 @@ This script will:
       ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=16 seed:=7 window_size:=3
    (plus data_root:=... and optional extra launch args)
 5) Parse each run's data_root/<timestamp>/summary.json
-6) Collect per-point values into CSV with:
-   - rows: r1..rN
-   - columns: seed (seed-start..seed-end)
-   One CSV per window_size group.
+6) Collect one aggregated CSV with one row per seed:
+   - seed
+   - solve_total_time_s
+   - origin_time
+   - ws1_time
+   - ws{K}_time
+   - ws{K}_opt_rate_vs_ws1
 
 Notes on summary parsing
 ------------------------
-- If summary.json contains:
-      optimization_rate.values = [{"point":"p1","r_i":...}, ...]
-  we will use it.
-- Otherwise (default panda_ik_window summary format), we fall back to:
-      window.results_by_ws[str(window_size)].segment_times_s
-  (i.e. per-segment time in seconds).
+- solve_total_time_s comes from:
+      ik_solve_timing.total_s
+- origin_time comes from:
+      origin.total_time_s
+- ws total time comes from:
+      window.total_time_s_by_ws
 
 All outputs are kept under data_window/ by default:
   - raw run outputs: data_window/np{N}/ws{W}/seed{S}/<timestamp>/*
@@ -170,60 +173,55 @@ def _parse_window_sizes_arg(spec: str, *, num_points: int) -> List[int]:
     return out
 
 
-def _extract_rates(summary_json: Path, num_points_expected: int, window_size: int) -> List[float]:
-    """
-    Return [r1..rN] from one run summary.json.
-
-    Priority:
-      1) optimization_rate.values[*].r_i (if present)
-      2) window.results_by_ws[ws].segment_times_s (fallback)
-    """
+def _extract_summary_metrics(summary_json: Path) -> tuple[float, float, Dict[int, float]]:
+    """Return (solve_total_time_s, origin_time_s, window_total_time_s_by_ws) from one run summary.json."""
     with summary_json.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    # (1) optimization_rate.values (user-provided/legacy/custom field)
-    vals = data.get("optimization_rate", {}).get("values", [])
-    if isinstance(vals, list) and vals:
-        def _point_index(v: Dict) -> int:
-            p = str(v.get("point", ""))
-            if p.startswith("p"):
+    solve_total_time_s = math.nan
+    ik_solve_timing = data.get("ik_solve_timing", {})
+    if isinstance(ik_solve_timing, dict):
+        try:
+            solve_total_time_s = float(ik_solve_timing.get("total_s", math.nan))
+        except Exception:
+            solve_total_time_s = math.nan
+
+    origin_time_s = math.nan
+    origin = data.get("origin", {})
+    if isinstance(origin, dict):
+        try:
+            origin_time_s = float(origin.get("total_time_s", math.nan))
+        except Exception:
+            origin_time_s = math.nan
+
+    totals_by_ws: Dict[int, float] = {}
+    window = data.get("window", {})
+    if isinstance(window, dict):
+        total_time_s_by_ws = window.get("total_time_s_by_ws", {}) or {}
+        if isinstance(total_time_s_by_ws, dict):
+            for ws_key, total_s in total_time_s_by_ws.items():
                 try:
-                    return int(p[1:])
+                    totals_by_ws[int(ws_key)] = float(total_s)
                 except Exception:
-                    return 10**9
-            return 10**9
+                    continue
 
-        vals_sorted = sorted(vals, key=_point_index)
-        rates = [float(v.get("r_i", math.nan)) for v in vals_sorted]
-    else:
-        # (2) fallback: segment_times_s in panda_ik_window summary
-        ws_key = str(int(window_size))
-        window = data.get("window", {})
-        results_by_ws = {}
-        if isinstance(window, dict):
+        if not totals_by_ws:
             results_by_ws = window.get("results_by_ws", {}) or {}
-        res = None
-        if isinstance(results_by_ws, dict):
-            res = results_by_ws.get(ws_key)
+            if isinstance(results_by_ws, dict):
+                for ws_key, payload in results_by_ws.items():
+                    if not isinstance(payload, dict):
+                        continue
+                    raw_total = payload.get("total_time_s", None)
+                    if raw_total is None:
+                        final_path = payload.get("final_path", {})
+                        if isinstance(final_path, dict):
+                            raw_total = final_path.get("total_time_s", None)
+                    try:
+                        totals_by_ws[int(ws_key)] = float(raw_total)
+                    except Exception:
+                        continue
 
-        if not isinstance(res, dict):
-            raise ValueError(
-                f"No optimization_rate.values AND no window.results_by_ws['{ws_key}'] in {summary_json}"
-            )
-
-        seg_times = res.get("segment_times_s", [])
-        if not isinstance(seg_times, list) or not seg_times:
-            raise ValueError(f"No segment_times_s for ws={ws_key} in {summary_json}")
-
-        rates = [float(x) for x in seg_times]
-
-    # Normalize length to num_points_expected
-    if len(rates) < num_points_expected:
-        rates = rates + [math.nan] * (num_points_expected - len(rates))
-    elif len(rates) > num_points_expected:
-        rates = rates[:num_points_expected]
-
-    return rates
+    return solve_total_time_s, origin_time_s, totals_by_ws
 
 
 def _run_ros2_launch(
@@ -265,39 +263,69 @@ def _run_ros2_launch(
     return int(proc.returncode)
 
 
-def _write_rates_csv(
+def _relative_improvement_against_ws1(ws1_time: float, ws_time: float) -> float:
+    """Return relative improvement over ws=1: (ws1 - ws) / ws1."""
+    if not math.isfinite(float(ws1_time)) or float(ws1_time) <= 0.0:
+        return math.nan
+    if not math.isfinite(float(ws_time)):
+        return math.nan
+    return float((float(ws1_time) - float(ws_time)) / float(ws1_time))
+
+
+def _write_summary_csv(
     *,
     out_csv: Path,
     seeds: Sequence[int],
-    rates_by_seed: Dict[int, List[float]],
-    num_points: int,
+    window_sizes: Sequence[int],
+    summary_by_seed: Dict[int, Dict[str, object]],
 ) -> None:
-    """
-    Write CSV with:
-      - rows: r1..rN
-      - columns: seed values
-    """
+    """Write one aggregated CSV row per seed."""
     _ensure_dir(out_csv.parent)
 
-    header = ["rate"] + [str(s) for s in seeds]
+    ordered_other_ws = [int(ws) for ws in window_sizes if int(ws) != 1]
+    header = ["seed", "solve_total_time_s", "origin_time", "ws1_time"]
+    for ws in ordered_other_ws:
+        header.append(f"ws{int(ws)}_time")
+        header.append(f"ws{int(ws)}_opt_rate_vs_ws1")
+
     with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(header)
-        for i in range(1, num_points + 1):
-            row_name = f"r{i}"
-            row: List[str] = [row_name]
-            for s in seeds:
-                vals = rates_by_seed.get(s)
-                v = math.nan
-                if vals is not None and (i - 1) < len(vals):
-                    v = float(vals[i - 1])
-                row.append(str(v))
+        for seed in seeds:
+            payload = summary_by_seed.get(int(seed), {})
+            solve_total_time_s = math.nan
+            origin_time_s = math.nan
+            total_time_s_by_ws: Dict[int, float] = {}
+
+            if isinstance(payload, dict):
+                try:
+                    solve_total_time_s = float(payload.get("solve_total_time_s", math.nan))
+                except Exception:
+                    solve_total_time_s = math.nan
+                try:
+                    origin_time_s = float(payload.get("origin_time_s", math.nan))
+                except Exception:
+                    origin_time_s = math.nan
+                raw_totals = payload.get("total_time_s_by_ws", {})
+                if isinstance(raw_totals, dict):
+                    for ws_key, total_s in raw_totals.items():
+                        try:
+                            total_time_s_by_ws[int(ws_key)] = float(total_s)
+                        except Exception:
+                            continue
+
+            ws1_time = float(total_time_s_by_ws.get(1, math.nan))
+            row: List[object] = [int(seed), solve_total_time_s, origin_time_s, ws1_time]
+            for ws in ordered_other_ws:
+                ws_time = float(total_time_s_by_ws.get(int(ws), math.nan))
+                row.append(ws_time)
+                row.append(_relative_improvement_against_ws1(ws1_time, ws_time))
             w.writerow(row)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Batch experiments for panda_ik_window: sweep window_size & seed, collect per-point values into CSV.",
+        description="Batch experiments for panda_ik_window: sweep window_size & seed, collect per-seed total timing summary into CSV.",
     )
 
     ap.add_argument("--pkg", default="panda_ik_window", help="ROS2 package name.")
@@ -352,7 +380,7 @@ def main() -> int:
         "--extra",
         type=str,
         default="",
-        help="Extra launch args appended verbatim (e.g. 'num_solutions:=150 time_model:=totg').",
+        help="Extra launch args appended verbatim (e.g. 'num_solutions:=150').",
     )
 
     args = ap.parse_args()
@@ -370,6 +398,14 @@ def main() -> int:
 
     total_rounds = len(window_sizes) * len(seeds)
     round_idx = 0
+    summary_by_seed: Dict[int, Dict[str, object]] = {
+        int(seed): {
+            "solve_total_time_s": math.nan,
+            "origin_time_s": math.nan,
+            "total_time_s_by_ws": {int(ws): math.nan for ws in window_sizes},
+        }
+        for seed in seeds
+    }
 
     print("[batch] settings")
     print(f"  num_points      = {num_points}")
@@ -383,8 +419,6 @@ def main() -> int:
         print(f"  extra args      = {extra_args}")
 
     for ws in window_sizes:
-        rates_by_seed: Dict[int, List[float]] = {}
-
         print("\n" + "=" * 80)
         print(f"[batch] group: num_points={num_points}, window_size={ws}")
         print("=" * 80)
@@ -424,7 +458,8 @@ def main() -> int:
                     f"[batch][{_now_str()}][ERROR] ros2 launch failed (returncode={rc}) "
                     f"for ws={ws}, seed={seed}"
                 )
-                rates_by_seed[seed] = [math.nan] * num_points
+                summary_by_seed[int(seed)]["origin_time_s"] = math.nan
+                summary_by_seed[int(seed)]["total_time_s_by_ws"][int(ws)] = math.nan
                 continue
 
             try:
@@ -433,27 +468,39 @@ def main() -> int:
                     prev_latest_dirname=prev_latest_name,
                     timeout_s=120.0,
                 )
-                rates = _extract_rates(summary_path, num_points_expected=num_points, window_size=int(ws))
-                rates_by_seed[seed] = rates
+                solve_total_time_s, origin_time_s, total_time_s_by_ws = _extract_summary_metrics(summary_path)
+                if math.isnan(float(summary_by_seed[int(seed)]["solve_total_time_s"])) or int(ws) == 1:
+                    summary_by_seed[int(seed)]["solve_total_time_s"] = float(solve_total_time_s)
+                if math.isnan(float(summary_by_seed[int(seed)]["origin_time_s"])) or int(ws) == 1:
+                    summary_by_seed[int(seed)]["origin_time_s"] = float(origin_time_s)
+                summary_by_seed[int(seed)]["total_time_s_by_ws"][int(ws)] = float(
+                    total_time_s_by_ws.get(int(ws), math.nan)
+                )
 
                 end_ts = _now_str()
                 print(f"[batch][{end_ts}] summary: {summary_path}")
-                print(f"[batch][{end_ts}] r[1..{num_points}] = {rates}")
+                print(f"[batch][{end_ts}] solve_total_time_s = {solve_total_time_s}")
+                print(f"[batch][{end_ts}] origin_time_s = {origin_time_s}")
+                print(
+                    f"[batch][{end_ts}] ws={ws} total_time_s = "
+                    f"{summary_by_seed[int(seed)]['total_time_s_by_ws'][int(ws)]}"
+                )
             except Exception as e:
                 print(
                     f"[batch][{_now_str()}][ERROR] Failed to parse summary for ws={ws}, seed={seed}: {e}"
                 )
-                rates_by_seed[seed] = [math.nan] * num_points
+                summary_by_seed[int(seed)]["origin_time_s"] = math.nan
+                summary_by_seed[int(seed)]["total_time_s_by_ws"][int(ws)] = math.nan
 
-        # One CSV per window_size group
-        out_csv = csv_dir / f"np{num_points}_ws{ws}.csv"
-        _write_rates_csv(
-            out_csv=out_csv,
-            seeds=seeds,
-            rates_by_seed=rates_by_seed,
-            num_points=num_points,
-        )
-        print(f"\n[batch] CSV written: {out_csv}\n")
+    window_slug = "_".join(str(int(ws)) for ws in window_sizes)
+    out_csv = csv_dir / f"np{num_points}_ws{window_slug}_summary.csv"
+    _write_summary_csv(
+        out_csv=out_csv,
+        seeds=seeds,
+        window_sizes=window_sizes,
+        summary_by_seed=summary_by_seed,
+    )
+    print(f"\n[batch] CSV written: {out_csv}\n")
 
     print("[batch] all done.")
     return 0
