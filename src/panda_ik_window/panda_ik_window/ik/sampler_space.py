@@ -36,7 +36,7 @@ class DeterministicRNG:
             return
         order = self._rng.permutation(len(xs))
         xs[:] = [xs[i] for i in order]
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 from geometry_msgs.msg import Pose
@@ -155,6 +155,119 @@ def get_link_xyz(state: RobotState, link_name: str) -> np.ndarray:
     return np.array([float(pose.position.x), float(pose.position.y), float(pose.position.z)], dtype=float)
 
 
+def _normalize_collision_check_output(out: Any) -> Optional[bool]:
+    if isinstance(out, bool):
+        return bool(out)
+    if isinstance(out, (int, np.integer)):
+        return bool(int(out))
+    if isinstance(out, tuple) and len(out) > 0:
+        head = out[0]
+        if isinstance(head, bool):
+            return bool(head)
+        if isinstance(head, (int, np.integer)):
+            return bool(int(head))
+    for attr in ("collision", "is_collision", "colliding", "is_colliding"):
+        try:
+            if hasattr(out, attr):
+                val = getattr(out, attr)
+                if isinstance(val, bool):
+                    return bool(val)
+                if isinstance(val, (int, np.integer)):
+                    return bool(int(val))
+        except Exception:
+            continue
+    return None
+
+
+def _query_state_collision_on_target(target: Any, *, state: RobotState, group: str) -> Optional[bool]:
+    for method in ("is_state_colliding", "isStateColliding"):
+        fn = getattr(target, method, None)
+        if fn is None:
+            continue
+        candidates = [
+            ((), {"robot_state": state, "joint_model_group_name": str(group)}),
+            ((), {"robot_state": state, "group_name": str(group)}),
+            ((), {"robot_state": state, "group": str(group)}),
+            ((), {"robot_state": state}),
+            ((state, str(group)), {}),
+            ((state,), {}),
+        ]
+        for args, kwargs in candidates:
+            try:
+                out = fn(*args, **kwargs)
+            except TypeError:
+                continue
+            except Exception:
+                continue
+            flag = _normalize_collision_check_output(out)
+            if flag is not None:
+                return bool(flag)
+    return None
+
+
+def _build_state_collision_checker(ctx: RobotContext, *, group: str) -> tuple[Optional[Any], str]:
+    """Build a best-effort state collision checker from planning_scene APIs.
+
+    Returns:
+      - checker(state) -> bool | None  (True=colliding, False=collision-free, None=unknown)
+      - reason when checker is unavailable
+    """
+    psm = None
+    for attr in ("get_planning_scene_monitor", "getPlanningSceneMonitor", "planning_scene_monitor"):
+        try:
+            value = getattr(ctx.moveit_py, attr)
+            psm = value() if callable(value) else value
+            if psm is not None:
+                break
+        except Exception:
+            continue
+
+    if psm is None:
+        return None, "planning_scene_monitor not available from MoveItPy"
+
+    def _check(state: RobotState) -> Optional[bool]:
+        state.update()
+
+        # Fast path: psm directly exposes collision query.
+        flag = _query_state_collision_on_target(psm, state=state, group=group)
+        if flag is not None:
+            return bool(flag)
+
+        # Try read lock.
+        for lock_name in ("read_only", "readOnly", "locked_planning_scene_ro", "lockedPlanningSceneRO"):
+            lock_fn = getattr(psm, lock_name, None)
+            if lock_fn is None:
+                continue
+            try:
+                lock = lock_fn()
+            except Exception:
+                continue
+            try:
+                with lock as scene:
+                    flag2 = _query_state_collision_on_target(scene, state=state, group=group)
+                    if flag2 is not None:
+                        return bool(flag2)
+            except Exception:
+                continue
+
+        # Try plain planning-scene getter.
+        for getter in ("get_planning_scene", "getPlanningScene", "planning_scene"):
+            try:
+                value = getattr(psm, getter)
+                scene = value() if callable(value) else value
+            except Exception:
+                continue
+            if scene is None:
+                continue
+            flag3 = _query_state_collision_on_target(scene, state=state, group=group)
+            if flag3 is not None:
+                return bool(flag3)
+
+        return None
+
+    return _check, ""
+
+
 def compute_nullspace_direction(state: RobotState, group: str, tip_link: str, rng: DeterministicRNG) -> Optional[np.ndarray]:
     """
     Compute one (randomized) nullspace direction in joint space from Jacobian J(q).
@@ -234,7 +347,7 @@ def sample_ik_solutions(
     target_point: TargetPoint,
     nominal_tip_quat_xyzw: Tuple[float, float, float, float],
     named_start_for_seeding: str = "ready",
-    num_solutions: int = 200,
+    num_solutions: int = 100,
     num_spaces: int = 20,
     max_attempts: int = 20000,
     ik_timeout_s: float = 0.05,
@@ -319,6 +432,11 @@ def sample_ik_solutions(
     t0 = time.time()
     attempts = 0
     successes = 0
+    collision_checks = 0
+    collision_rejected = 0
+    collision_checker, collision_checker_reason = _build_state_collision_checker(ctx, group=str(group))
+    collision_checker_enabled = collision_checker is not None
+    collision_checker_runtime_disabled = False
 
     space_attempt_budget = max(50, int(float(max_attempts) / float(num_spaces)))
 
@@ -357,6 +475,18 @@ def sample_ik_solutions(
 
             successes += 1
             state.update()
+            if collision_checker is not None:
+                collision_checks += 1
+                colliding = collision_checker(state)
+                if colliding is None:
+                    collision_checker_reason = (
+                        collision_checker_reason or "collision checker became unavailable at runtime"
+                    )
+                    collision_checker = None
+                    collision_checker_runtime_disabled = True
+                elif bool(colliding):
+                    collision_rejected += 1
+                    continue
             base_state = state
             base_q = np.array(state.get_joint_group_positions(group), dtype=float)
             break
@@ -393,7 +523,7 @@ def sample_ik_solutions(
 
         def _project(seed_q: np.ndarray) -> Optional[Tuple[RobotState, np.ndarray, np.ndarray]]:
             """Project a seed onto the IK manifold; return (state, q, feature_xyz)."""
-            nonlocal attempts, successes
+            nonlocal attempts, successes, collision_checks, collision_rejected, collision_checker, collision_checker_reason
 
             if not _budget_ok():
                 return None
@@ -409,6 +539,18 @@ def sample_ik_solutions(
 
             successes += 1
             st.update()
+            if collision_checker is not None:
+                collision_checks += 1
+                colliding = collision_checker(st)
+                if colliding is None:
+                    collision_checker_reason = (
+                        collision_checker_reason or "collision checker became unavailable at runtime"
+                    )
+                    collision_checker = None
+                    collision_checker_runtime_disabled = True
+                elif bool(colliding):
+                    collision_rejected += 1
+                    return None
             q = np.array(st.get_joint_group_positions(group), dtype=float)
             try:
                 p = get_link_xyz(st, feature_link)
@@ -772,6 +914,13 @@ def sample_ik_solutions(
         "found": int(len(solutions)),
         "attempts": int(attempts),
         "ik_successes": int(successes),
+        "self_collision_filter": {
+            "enabled": bool(collision_checker_enabled),
+            "checks": int(collision_checks),
+            "rejected": int(collision_rejected),
+            "available": bool(collision_checker_enabled and not collision_checker_runtime_disabled),
+            "reason": str(collision_checker_reason),
+        },
         "uniq_resolution_rad": float(uniq_resolution_rad),
         "yaw_range_rad": float(yaw_range_rad),
         "ik_timeout_s": float(ik_timeout_s),

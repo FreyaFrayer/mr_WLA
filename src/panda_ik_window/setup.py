@@ -9,7 +9,15 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
-        ("share/" + package_name + "/launch", ["launch/ik_benchmark.launch.py"]),
+        (
+            "share/" + package_name + "/launch",
+            [
+                "launch/ik_benchmark.launch.py",
+                "launch/ik_self_collision_check.launch.py",
+                "launch/ik_collision_pair_playback_rviz.launch.py",
+            ],
+        ),
+        ("share/" + package_name + "/rviz", ["rviz/collision_pair_playback.rviz"]),
         # moveit_cpp.xml
         ("share/" + package_name + "/config", ["config/moveit_cpp_offline.yaml"]),
     ],
@@ -23,6 +31,8 @@ setup(
     entry_points={
         "console_scripts": [
             "ik_window = panda_ik_window.scripts.run_benchmark:main",
+            "ik_check_self_collision = panda_ik_window.scripts.check_dataset_self_collision:main",
+            "ik_collision_pair_player = panda_ik_window.scripts.collision_pair_player:main",
         ],
     },
 )

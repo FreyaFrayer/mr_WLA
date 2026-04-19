@@ -24,7 +24,7 @@ def sample_ik_solutions_multi_pass(
     target_point: TargetPoint,
     nominal_tip_quat_xyzw: Tuple[float, float, float, float],
     named_start_for_seeding: str = "ready",
-    requested: int = 200,
+    requested: int = 100,
     passes: int = 3,
     pass_seed_stride: int = 100_000,
     # per-pass sampling params (same as sampler_space.sample_ik_solutions)
@@ -51,14 +51,14 @@ def sample_ik_solutions_multi_pass(
 
     Notes
     -----
-    - `requested` is the final target count (usually 200).
+    - `requested` is the final target count (usually 100).
     - If uniqueness saturation prevents reaching `requested`, this function returns
       fewer solutions and sets meta['reason'].
     """
 
     requested = int(requested)
     if requested <= 0:
-        requested = 200
+        requested = 100
 
     passes = int(passes)
     if passes < 1:

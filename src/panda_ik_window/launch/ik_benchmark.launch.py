@@ -16,6 +16,7 @@ def generate_launch_description() -> LaunchDescription:
     num_points = LaunchConfiguration("num_points")
     seed = LaunchConfiguration("seed")
     path_pattern = LaunchConfiguration("path_pattern")
+    trend_max_step = LaunchConfiguration("trend_max_step")
 
     group = LaunchConfiguration("group")
     named_start = LaunchConfiguration("named_start")
@@ -42,6 +43,7 @@ def generate_launch_description() -> LaunchDescription:
     ws_y_max = LaunchConfiguration("ws_y_max")
     ws_z_min = LaunchConfiguration("ws_z_min")
     ws_z_max = LaunchConfiguration("ws_z_max")
+    ws_xy_inner_radius = LaunchConfiguration("ws_xy_inner_radius")
     min_sep = LaunchConfiguration("min_sep")
 
     # Segment time model
@@ -82,12 +84,13 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("num_points", default_value="8"),
             DeclareLaunchArgument("seed", default_value="7"),
             DeclareLaunchArgument("path_pattern", default_value="random"),
+            DeclareLaunchArgument("trend_max_step", default_value="0.30"),
             DeclareLaunchArgument("group", default_value="panda_arm"),
             DeclareLaunchArgument("named_start", default_value="random"),
             DeclareLaunchArgument("p0_down", default_value="false"),
             DeclareLaunchArgument("data_root", default_value="data_window"),
             DeclareLaunchArgument("reuse_candidates_dir", default_value=""),
-            DeclareLaunchArgument("num_solutions", default_value="200"),
+            DeclareLaunchArgument("num_solutions", default_value="100"),
             DeclareLaunchArgument("num_spaces", default_value="10"),
             DeclareLaunchArgument("max_attempts", default_value="400"),
             DeclareLaunchArgument("ik_timeout", default_value="0.1"),
@@ -101,6 +104,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("ws_y_max", default_value="0.55"),
             DeclareLaunchArgument("ws_z_min", default_value="0.05"),
             DeclareLaunchArgument("ws_z_max", default_value="0.85"),
+            DeclareLaunchArgument("ws_xy_inner_radius", default_value="0.25"),
             DeclareLaunchArgument("min_sep", default_value="0.06"),
             DeclareLaunchArgument("time_model", default_value="trapezoid"),
             DeclareLaunchArgument("window_size", default_value="all"),
@@ -123,6 +127,8 @@ def generate_launch_description() -> LaunchDescription:
                     seed,
                     "--path-pattern",
                     path_pattern,
+                    "--trend-max-step",
+                    trend_max_step,
                     "--group",
                     group,
                     "--named-start",
@@ -164,6 +170,8 @@ def generate_launch_description() -> LaunchDescription:
                     "--ws-z",
                     ws_z_min,
                     ws_z_max,
+                    "--ws-xy-inner-radius",
+                    ws_xy_inner_radius,
                     "--min-sep",
                     min_sep,
                     "--time-model",

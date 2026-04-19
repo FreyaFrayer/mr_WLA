@@ -31,6 +31,73 @@ source install/setup.bash
 ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=8 seed:=7 window_size:=3
 ```
 
+Default target sampling workspace:
+- outer box: `x in [-0.75, 0.75]`, `y in [-0.55, 0.55]`, `z in [0.05, 0.85]`
+- inner XY exclusion: `sqrt(x^2 + y^2) >= 0.25`, so targets too close to the robot body are skipped
+
+You can override it from launch if needed:
+
+```bash
+ros2 launch panda_ik_window ik_benchmark.launch.py \
+  ws_x_min:=-0.75 ws_x_max:=0.75 \
+  ws_y_min:=-0.55 ws_y_max:=0.55 \
+  ws_z_min:=0.05 ws_z_max:=0.85 \
+  ws_xy_inner_radius:=0.25
+```
+
+## Verify Self-Collision On `dataset_ws3_top50_sort50`
+
+This package also provides a checker for:
+- each `q_cur` sample
+- all next-point candidates in `q_cand_fut[:,0,:,:]` (masked by `cand_mask[:,0,:]`)
+- synchronized trapezoid-velocity interpolation between `q_cur -> q_cand_next`
+- self-collision query at every sampled state
+
+Run with MoveIt parameters preloaded by launch:
+
+```bash
+ros2 launch panda_ik_window ik_self_collision_check.launch.py \
+  dataset:=/Users/<you>/Desktop/dataset_ws3_top50_sort50 \
+  sample_dt:=0.02 \
+  min_samples:=5
+```
+
+Useful limits for smoke-test:
+
+```bash
+ros2 launch panda_ik_window ik_self_collision_check.launch.py \
+  dataset:=/Users/<you>/Desktop/dataset_ws3_top50_sort50 \
+  max_samples:=100 \
+  max_candidates:=50
+```
+
+Outputs are written to dataset dir by default:
+- `self_collision_trapezoid.npz`
+- `self_collision_trapezoid_summary.json`
+
+## Visualize One Collision Pair In RViz
+
+After generating `collision_pairs.json`, you can pick one pair and replay
+`q_cur -> q_cand_next` with synchronized trapezoid timing in a loop.
+
+```bash
+ros2 launch panda_ik_window ik_collision_pair_playback_rviz.launch.py \
+  dataset:=/Users/<you>/Desktop/dataset_ws3_top50_sort50 \
+  pair_index:=0 \
+  sample_dt:=0.02 \
+  min_samples:=5 \
+  speed_scale:=1.0
+```
+
+Optional: directly specify `(i, k)` (bypass `collision_pairs.json`):
+
+```bash
+ros2 launch panda_ik_window ik_collision_pair_playback_rviz.launch.py \
+  dataset:=/Users/<you>/Desktop/dataset_ws3_top50_sort50 \
+  sample_i:=123 \
+  candidate_k:=7
+```
+
 By default, `p0` start state is now a seeded random joint state (controlled by `seed`).
 You can still force a named SRDF state with `named_start:=ready`, or provide explicit joints via `--p0`.
 Use `p0_down:=true` to force the `p0` tip orientation to vertical-down (world `-Z`) by IK while keeping the same tip position.
@@ -46,6 +113,16 @@ ros2 launch panda_ik_window ik_benchmark.launch.py num_points:=8 seed:=7 window_
 - `switching`: multi-directional switching
 - `random`: unconstrained random (may be trend/switching/unstructured, default)
 - `trend_plus`: trend-dominant with periodic switch (every 3~5 trend points) and danger-zone turn-back to safe zone
+
+For `trend` / `trend_plus`, you can additionally limit the point-to-point step length:
+
+```bash
+ros2 launch panda_ik_window ik_benchmark.launch.py \
+  num_points:=8 seed:=7 window_size:=3 path_pattern:=trend \
+  trend_max_step:=0.25
+```
+
+When the last accepted trend point is already near the workspace edge, the sampler now only accepts candidates that move back toward the safer middle region, which reduces "edge to more-edge" dead ends.
 
 Evaluate multiple window sizes in one run:
 

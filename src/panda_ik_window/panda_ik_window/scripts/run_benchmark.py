@@ -244,6 +244,258 @@ def _sanitize_start_state_for_planning(
     return start_state, False, -1
 
 
+def _normalize_collision_check_output(out: Any) -> bool | None:
+    if isinstance(out, bool):
+        return bool(out)
+    if isinstance(out, (int, np.integer)):
+        return bool(int(out))
+    if isinstance(out, tuple) and len(out) > 0:
+        head = out[0]
+        if isinstance(head, bool):
+            return bool(head)
+        if isinstance(head, (int, np.integer)):
+            return bool(int(head))
+    for attr in ("collision", "is_collision", "colliding", "is_colliding"):
+        try:
+            if hasattr(out, attr):
+                val = getattr(out, attr)
+                if isinstance(val, bool):
+                    return bool(val)
+                if isinstance(val, (int, np.integer)):
+                    return bool(int(val))
+        except Exception:
+            continue
+    return None
+
+
+def _query_state_self_collision_flag(obj: Any, *, start_state: Any, group: str) -> tuple[bool | None, str]:
+    for method in ("is_state_colliding", "isStateColliding"):
+        fn = getattr(obj, method, None)
+        if fn is None:
+            continue
+
+        # Most MoveItPy bindings accept either robot_state + group kwargs or positional args.
+        candidates = [
+            ((), {"robot_state": start_state, "joint_model_group_name": str(group)}),
+            ((), {"robot_state": start_state, "group_name": str(group)}),
+            ((), {"robot_state": start_state, "group": str(group)}),
+            ((), {"robot_state": start_state}),
+            ((start_state, str(group)), {}),
+            ((start_state,), {}),
+        ]
+        for args, kwargs in candidates:
+            try:
+                out = fn(*args, **kwargs)
+            except TypeError:
+                continue
+            except Exception:
+                continue
+            flag = _normalize_collision_check_output(out)
+            if flag is not None:
+                return bool(flag), f"{type(obj).__name__}.{method}"
+    return None, ""
+
+
+def _precheck_start_state_self_collision(*, ctx, start_state) -> tuple[str, str]:
+    """Return ("ok" | "colliding" | "unavailable", detail)."""
+    start_state.update()
+
+    psm = None
+    for attr in ("get_planning_scene_monitor", "getPlanningSceneMonitor", "planning_scene_monitor"):
+        try:
+            value = getattr(ctx.moveit_py, attr)
+            psm = value() if callable(value) else value
+            if psm is not None:
+                break
+        except Exception:
+            continue
+
+    if psm is None:
+        return "unavailable", "planning_scene_monitor not available from MoveItPy"
+
+    lock_errors: List[str] = []
+    for lock_name in ("read_only", "readOnly", "locked_planning_scene_ro", "lockedPlanningSceneRO"):
+        lock_fn = getattr(psm, lock_name, None)
+        if lock_fn is None:
+            continue
+        try:
+            lock = lock_fn()
+        except Exception as e:
+            lock_errors.append(f"{lock_name}() failed: {e}")
+            continue
+        try:
+            with lock as scene:
+                for target in (scene, psm):
+                    colliding, source = _query_state_self_collision_flag(
+                        target,
+                        start_state=start_state,
+                        group=ctx.group,
+                    )
+                    if colliding is not None:
+                        return ("colliding" if colliding else "ok"), f"source={source}"
+        except Exception as e:
+            lock_errors.append(f"{lock_name} context failed: {e}")
+
+    for getter in ("get_planning_scene", "getPlanningScene", "planning_scene"):
+        try:
+            value = getattr(psm, getter)
+            scene = value() if callable(value) else value
+        except Exception:
+            continue
+        if scene is None:
+            continue
+        colliding, source = _query_state_self_collision_flag(
+            scene,
+            start_state=start_state,
+            group=ctx.group,
+        )
+        if colliding is not None:
+            return ("colliding" if colliding else "ok"), f"source={source}"
+
+    if len(lock_errors) > 0:
+        return "unavailable", "; ".join(lock_errors[:3])
+    return "unavailable", "planning_scene self-collision API not available"
+
+
+def _ensure_start_state_collision_free_before_eval(
+    *,
+    ctx,
+    start_state,
+    seed: int,
+    ik_timeout_s: float,
+    repair_trials: int,
+) -> Any:
+    status, detail = _precheck_start_state_self_collision(ctx=ctx, start_state=start_state)
+    if status == "ok":
+        print(f"[run] start state precheck: collision_free ({detail})")
+        return start_state
+    if status == "unavailable":
+        print(f"[run] WARN: start state precheck unavailable: {detail}")
+        return start_state
+
+    print(f"[run] start state precheck: self-collision detected ({detail}); trying repair ...")
+    repaired_state, adjusted, used_trials = _sanitize_start_state_for_planning(
+        ctx=ctx,
+        start_state=start_state,
+        seed=int(seed) + 97_531,
+        ik_timeout_s=float(ik_timeout_s),
+        max_trials=max(1, int(repair_trials)),
+    )
+    if adjusted:
+        print(f"[run] start state repair succeeded by IK projection (trials={int(used_trials)})")
+    elif int(used_trials) < 0:
+        print("[run] WARN: start state repair could not find an IK projection candidate.")
+
+    status2, detail2 = _precheck_start_state_self_collision(ctx=ctx, start_state=repaired_state)
+    if status2 == "ok":
+        print(f"[run] start state precheck after repair: collision_free ({detail2})")
+        return repaired_state
+    if status2 == "unavailable":
+        print(f"[run] WARN: post-repair start state precheck unavailable: {detail2}")
+        return repaired_state
+
+    print(
+        "[run] WARN: start state remains self-colliding after IK repair; "
+        "trying deterministic random re-sampling ..."
+    )
+    lows = np.array([jl.min_position for jl in ctx.joint_limits], dtype=float)
+    highs = np.array([jl.max_position for jl in ctx.joint_limits], dtype=float)
+    rng = np.random.default_rng(int(seed) + 6_171_113)
+    reseed_trials = max(8, min(512, int(repair_trials)))
+    for i in range(1, int(reseed_trials) + 1):
+        q_seed = rng.uniform(lows, highs).astype(float).tolist()
+        candidate = make_robot_state_from_joints(ctx, q_seed)
+        status3, detail3 = _precheck_start_state_self_collision(ctx=ctx, start_state=candidate)
+        if status3 == "ok":
+            print(
+                "[run] start state fallback: random reseed collision_free "
+                f"(trial={int(i)}/{int(reseed_trials)}, {detail3})"
+            )
+            return candidate
+        if status3 == "unavailable":
+            print(
+                "[run] WARN: random reseed precheck unavailable; "
+                f"accepting sampled start state ({detail3})"
+            )
+            return candidate
+
+    print("[run] WARN: random reseed fallback failed; trying named / midpoint start states ...")
+    fallback_builders: List[tuple[str, Callable[[], Any]]] = [
+        ("named:ready", lambda: make_robot_state_from_named(ctx, "ready")),
+        ("named:home", lambda: make_robot_state_from_named(ctx, "home")),
+        (
+            "midpoint",
+            lambda: make_robot_state_from_joints(
+                ctx,
+                [(float(jl.min_position) + float(jl.max_position)) * 0.5 for jl in ctx.joint_limits],
+            ),
+        ),
+    ]
+    for label, builder in fallback_builders:
+        try:
+            candidate = builder()
+        except Exception as e:
+            print(f"[run] WARN: start state fallback '{label}' unavailable: {e}")
+            continue
+
+        status4, detail4 = _precheck_start_state_self_collision(ctx=ctx, start_state=candidate)
+        if status4 == "ok":
+            print(f"[run] start state fallback selected: {label} ({detail4})")
+            return candidate
+        if status4 == "unavailable":
+            print(
+                "[run] WARN: start state fallback selected without precheck: "
+                f"{label} ({detail4})"
+            )
+            return candidate
+        print(f"[run] WARN: start state fallback '{label}' still colliding ({detail4})")
+
+    raise RuntimeError(
+        "start state self-collision precheck failed before evaluation: "
+        f"{detail2}. Please change --seed/--p0/--named-start."
+    )
+
+
+def _sample_random_start_state_until_usable(
+    *,
+    ctx,
+    seed: int,
+    max_trials: int = 0,
+) -> tuple[Any, int, str]:
+    """Deterministically sample random start states until one is usable."""
+    lows = np.array([jl.min_position for jl in ctx.joint_limits], dtype=float)
+    highs = np.array([jl.max_position for jl in ctx.joint_limits], dtype=float)
+    rng = np.random.default_rng(int(seed) + 1_234_567)
+
+    trial = 0
+    while True:
+        trial += 1
+        q0 = rng.uniform(lows, highs).astype(float).tolist()
+        state = make_robot_state_from_joints(ctx, q0)
+        status, detail = _precheck_start_state_self_collision(ctx=ctx, start_state=state)
+        if status == "ok":
+            return state, int(trial), str(detail)
+        if status == "unavailable":
+            print(
+                "[run] WARN: start state precheck unavailable during random start sampling; "
+                f"accepting sampled state ({detail})"
+            )
+            return state, int(trial), str(detail)
+
+        if int(max_trials) > 0 and trial >= int(max_trials):
+            raise RuntimeError(
+                "cannot sample a collision-free random start state within max_trials="
+                f"{int(max_trials)}; last_status={status}, last_detail={detail}. "
+                "Please change --seed/--p0/--named-start."
+            )
+
+        if trial % 500 == 0:
+            print(
+                "[run] start state random reseed is still searching for collision-free state "
+                f"(trials={int(trial)}) ..."
+            )
+
+
 def _load_reused_candidates(
     *,
     reuse_dir: Path,
@@ -471,6 +723,15 @@ def _parse_args() -> argparse.Namespace:
             "trend_plus=trend with periodic anti-stall switch and danger-zone return-to-safe switch."
         ),
     )
+    p.add_argument(
+        "--trend-max-step",
+        type=float,
+        default=0.30,
+        help=(
+            "Maximum Cartesian distance (m) between consecutive accepted points in "
+            "trend/trend_plus mode. Set <= 0 to disable."
+        ),
+    )
 
     # Window policy evaluation
     p.add_argument(
@@ -575,6 +836,15 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--ws-x", type=float, nargs=2, default=[-0.75, 0.75], metavar=("X_MIN", "X_MAX"))
     p.add_argument("--ws-y", type=float, nargs=2, default=[-0.55, 0.55], metavar=("Y_MIN", "Y_MAX"))
     p.add_argument("--ws-z", type=float, nargs=2, default=[0.05, 0.85], metavar=("Z_MIN", "Z_MAX"))
+    p.add_argument(
+        "--ws-xy-inner-radius",
+        type=float,
+        default=0.25,
+        help=(
+            "Exclude sampled target points whose XY distance to the robot base is smaller "
+            "than this radius (m). Default keeps samples away from the robot body."
+        ),
+    )
     p.add_argument("--min-sep", type=float, default=0.06, help="Min separation between target points (m).")
 
     # Important: ignore ROS 2 launch args like --ros-args/--params-file
@@ -700,6 +970,15 @@ def main() -> None:
                     "origin planner may fail at CheckStartStateCollision."
                 )
 
+            start_state = _ensure_start_state_collision_free_before_eval(
+                ctx=ctx,
+                start_state=start_state,
+                seed=int(args.seed),
+                ik_timeout_s=float(args.ik_timeout),
+                repair_trials=int(args.precheck_attempts),
+            )
+            start_q = list(map(float, start_state.get_joint_group_positions(ctx.group)))
+
             # Backward compatibility: old targets.json may not contain orientation.
             if any(bool(v) for v in target_orientation_missing):
                 start_state_for_target_pose = make_robot_state_from_joints(ctx, start_q)
@@ -731,14 +1010,17 @@ def main() -> None:
                 start_label = "custom"
                 named_start_for_seeding = "custom"
             elif named_start_low in {"", "random", "rand", "rng"}:
-                rng_start = np.random.default_rng(int(args.seed) + 1_234_567)
-                lows = np.array([jl.min_position for jl in ctx.joint_limits], dtype=float)
-                highs = np.array([jl.max_position for jl in ctx.joint_limits], dtype=float)
-                q0 = rng_start.uniform(lows, highs).astype(float).tolist()
-                start_state = make_robot_state_from_joints(ctx, q0)
+                start_state, random_trials, random_detail = _sample_random_start_state_until_usable(
+                    ctx=ctx,
+                    seed=int(args.seed),
+                    max_trials=0,
+                )
                 start_label = "random_seeded"
                 named_start_for_seeding = "ready"
-                print("[run] start state: random_seeded (deterministic by --seed)")
+                print(
+                    "[run] start state: random_seeded collision_free "
+                    f"(deterministic by --seed, trials={int(random_trials)}, {random_detail})"
+                )
             else:
                 start_state = make_robot_state_from_named(ctx, named_start_raw)
                 start_label = named_start_raw
@@ -771,6 +1053,14 @@ def main() -> None:
                     "origin planner may fail at CheckStartStateCollision."
                 )
 
+            start_state = _ensure_start_state_collision_free_before_eval(
+                ctx=ctx,
+                start_state=start_state,
+                seed=int(args.seed),
+                ik_timeout_s=float(args.ik_timeout),
+                repair_trials=int(args.precheck_attempts),
+            )
+
             start_q = list(map(float, start_state.get_joint_group_positions(ctx.group)))
 
             # Fallback nominal tip orientation from start state (used if a point has invalid quaternion).
@@ -796,11 +1086,20 @@ def main() -> None:
                 x_min=float(args.ws_x[0]), x_max=float(args.ws_x[1]),
                 y_min=float(args.ws_y[0]), y_max=float(args.ws_y[1]),
                 z_min=float(args.ws_z[0]), z_max=float(args.ws_z[1]),
+                xy_inner_radius=float(args.ws_xy_inner_radius),
             )
 
             rng_points = np.random.default_rng(int(args.seed))
             print(f"[select] candidate_mode = sampled")
             print(f"[select] path_pattern = {path_pattern}")
+            print(
+                "[select] workspace = "
+                f"x[{ws.x_min:.3f}, {ws.x_max:.3f}] "
+                f"y[{ws.y_min:.3f}, {ws.y_max:.3f}] "
+                f"z[{ws.z_min:.3f}, {ws.z_max:.3f}] "
+                f"xy_inner_radius={ws.xy_inner_radius:.3f}"
+            )
+            print(f"[select] trend_max_step = {float(args.trend_max_step):.3f}")
 
             @_timed_call
             def _solve_one_point(point_idx_1based: int) -> tuple[TargetPoint, Dict, int]:
@@ -821,6 +1120,7 @@ def main() -> None:
                         path_pattern=path_pattern,
                         min_separation_m=float(args.min_sep),
                         workspace=ws,
+                        trend_max_step_distance_m=float(args.trend_max_step),
                         max_attempts=2000,
                     )
 
@@ -1401,6 +1701,14 @@ def main() -> None:
                 "num_points": int(n),
                 "num_solutions": int(requested),
                 "path_pattern": str(path_pattern),
+                "trend_max_step_m": float(args.trend_max_step),
+                "workspace": {
+                    "x": [float(args.ws_x[0]), float(args.ws_x[1])],
+                    "y": [float(args.ws_y[0]), float(args.ws_y[1])],
+                    "z": [float(args.ws_z[0]), float(args.ws_z[1])],
+                    "xy_inner_radius": float(args.ws_xy_inner_radius),
+                    "min_separation_m": float(args.min_sep),
+                },
                 "candidate_source_mode": str(candidate_source_mode),
                 "reuse_candidates_dir": str(reuse_dir) if reuse_dir is not None else "",
                 "time_model": {
@@ -1533,6 +1841,15 @@ def main() -> None:
         txt_lines.append(f"timestamp: {data_paths.timestamp}")
         txt_lines.append(f"seed: {int(args.seed)}")
         txt_lines.append(f"path_pattern: {path_pattern}")
+        txt_lines.append(f"trend_max_step_m: {float(args.trend_max_step):.3f}")
+        txt_lines.append(
+            "workspace: "
+            f"x[{float(args.ws_x[0]):.3f}, {float(args.ws_x[1]):.3f}] "
+            f"y[{float(args.ws_y[0]):.3f}, {float(args.ws_y[1]):.3f}] "
+            f"z[{float(args.ws_z[0]):.3f}, {float(args.ws_z[1]):.3f}] "
+            f"xy_inner_radius={float(args.ws_xy_inner_radius):.3f} "
+            f"min_sep={float(args.min_sep):.3f}"
+        )
         txt_lines.append(f"candidate_source_mode: {candidate_source_mode}")
         if reuse_dir is not None:
             txt_lines.append(f"reuse_candidates_dir: {reuse_dir}")

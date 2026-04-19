@@ -13,8 +13,9 @@ from .robot import RobotContext
 PATH_PATTERN_CHOICES = ("trend", "switching", "random", "trend_plus")
 
 _TREND_COHERENCE_MIN = 0.50
-_TREND_AVG_TURN_MAX_RAD = float(np.deg2rad(130.0))
-_TREND_CONSEC_COS_MIN = -0.7
+_TREND_AVG_TURN_MAX_RAD = float(np.deg2rad(120.0))
+_TREND_CONSEC_COS_MIN = -0.6
+_TREND_EDGE_RETURN_MIN_GAIN = 1e-4
 _SWITCH_TURN_MIN_RAD = float(np.deg2rad(150.0))
 _SWITCH_CONSEC_COS_MAX = -0.8
 _TREND_PLUS_MIN_STREAK = 3
@@ -151,7 +152,23 @@ def _match_path_pattern(
     existing_points: Sequence[TargetPoint],
     candidate: TargetPoint,
     workspace: Optional["WorkspaceBounds"] = None,
+    trend_max_step_distance_m: float = 0.0,
 ) -> bool:
+    ws = workspace if workspace is not None else WorkspaceBounds()
+    history: List[TargetPoint] = []
+    if path_anchor is not None:
+        history.append(path_anchor)
+    history.extend(existing_points)
+
+    if pattern in {"trend", "trend_plus"}:
+        if not _trend_step_is_valid(
+            history=history,
+            candidate=candidate,
+            workspace=ws,
+            max_step_distance_m=trend_max_step_distance_m,
+        ):
+            return False
+
     points: List[TargetPoint] = []
     if path_anchor is not None:
         points.append(path_anchor)
@@ -178,12 +195,6 @@ def _match_path_pattern(
         return True
 
     if pattern == "trend_plus":
-        ws = workspace if workspace is not None else WorkspaceBounds()
-        history: List[TargetPoint] = []
-        if path_anchor is not None:
-            history.append(path_anchor)
-        history.extend(existing_points)
-
         switch_count, trend_streak = _count_switches_and_trend_streak(history)
         streak_cap = _trend_plus_streak_cap(switch_count)
 
@@ -219,20 +230,68 @@ def _match_path_pattern(
 @dataclass(frozen=True)
 class WorkspaceBounds:
     """
-    Simple axis-aligned workspace bounds (meters).
-    Used only to reject obviously bad samples (e.g., below the table).
+    Simple workspace bounds (meters).
+    Used only to reject obviously bad samples (e.g., below the table or too
+    close to the robot base in the XY plane).
     """
-    x_min: float = 0.15
+    x_min: float = -0.75
     x_max: float = 0.75
     y_min: float = -0.55
     y_max: float = 0.55
     z_min: float = 0.05
     z_max: float = 0.85
+    xy_inner_radius: float = 0.25
 
     def contains(self, p: TargetPoint) -> bool:
-        return (self.x_min <= p.x <= self.x_max and
+        if not (self.x_min <= p.x <= self.x_max and
                 self.y_min <= p.y <= self.y_max and
-                self.z_min <= p.z <= self.z_max)
+                self.z_min <= p.z <= self.z_max):
+            return False
+
+        inner_r = float(max(0.0, self.xy_inner_radius))
+        if inner_r <= 0.0:
+            return True
+
+        xy_norm_sq = float(p.x * p.x + p.y * p.y)
+        return xy_norm_sq >= inner_r * inner_r
+
+    def xy_center(self) -> tuple[float, float]:
+        return (
+            0.5 * float(self.x_min + self.x_max),
+            0.5 * float(self.y_min + self.y_max),
+        )
+
+    def xy_edge_score(self, p: TargetPoint) -> float:
+        cx, cy = self.xy_center()
+        hx = max(_EPS, 0.5 * float(self.x_max - self.x_min))
+        hy = max(_EPS, 0.5 * float(self.y_max - self.y_min))
+        nx = abs(float(p.x) - cx) / hx
+        ny = abs(float(p.y) - cy) / hy
+        return float(max(nx, ny))
+
+    def moves_inward_xy(
+        self,
+        src: TargetPoint,
+        dst: TargetPoint,
+        *,
+        min_gain: float = _TREND_EDGE_RETURN_MIN_GAIN,
+    ) -> bool:
+        if not self.contains(dst):
+            return False
+        if self.in_safe_zone(dst):
+            return True
+
+        src_score = self.xy_edge_score(src)
+        dst_score = self.xy_edge_score(dst)
+        if dst_score > src_score - float(max(0.0, min_gain)):
+            return False
+
+        cx, cy = self.xy_center()
+        to_center = np.asarray([cx - float(src.x), cy - float(src.y)], dtype=float)
+        step = np.asarray([float(dst.x - src.x), float(dst.y - src.y)], dtype=float)
+        if float(np.linalg.norm(step)) <= _EPS:
+            return False
+        return float(np.dot(to_center, step)) > 0.0
 
     def _safe_bounds(self, margin_ratio: float = _TREND_PLUS_SAFE_MARGIN_RATIO) -> tuple[float, float, float, float, float, float]:
         ratio = float(max(0.0, min(0.45, margin_ratio)))
@@ -269,6 +328,27 @@ def _euclidean(a: TargetPoint, b: TargetPoint) -> float:
     return float((dx * dx + dy * dy + dz * dz) ** 0.5)
 
 
+def _trend_step_is_valid(
+    *,
+    history: Sequence[TargetPoint],
+    candidate: TargetPoint,
+    workspace: WorkspaceBounds,
+    max_step_distance_m: float,
+) -> bool:
+    if len(history) <= 0:
+        return True
+
+    last = history[-1]
+    max_step = float(max_step_distance_m)
+    if max_step > 0.0 and _euclidean(last, candidate) > max_step:
+        return False
+
+    if not workspace.in_danger_zone(last):
+        return True
+
+    return workspace.moves_inward_xy(last, candidate)
+
+
 def sample_one_reachable_point_fk(
     ctx: RobotContext,
     *,
@@ -278,6 +358,7 @@ def sample_one_reachable_point_fk(
     path_pattern: str = "random",
     min_separation_m: float = 0.06,
     workspace: Optional[WorkspaceBounds] = None,
+    trend_max_step_distance_m: float = 0.0,
     max_attempts: int = 2000,
 ) -> TargetPoint:
     """Sample a single *FK-reachable* Cartesian target pose.
@@ -344,6 +425,7 @@ def sample_one_reachable_point_fk(
             existing_points=existing_points,
             candidate=p,
             workspace=workspace,
+            trend_max_step_distance_m=trend_max_step_distance_m,
         ):
             continue
 
@@ -362,6 +444,7 @@ def sample_reachable_points(
     seed: int = 7,
     min_separation_m: float = 0.06,
     workspace: Optional[WorkspaceBounds] = None,
+    trend_max_step_distance_m: float = 0.0,
     max_attempts: int = 5000,
 ) -> List[TargetPoint]:
     """
@@ -396,6 +479,7 @@ def sample_reachable_points(
                 existing_points=points,
                 min_separation_m=float(min_separation_m),
                 workspace=workspace,
+                trend_max_step_distance_m=float(trend_max_step_distance_m),
                 max_attempts=50,
             )
         except RuntimeError:
