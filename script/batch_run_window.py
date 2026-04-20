@@ -21,8 +21,11 @@ The CSV stores:
 - solve_total_time_s
 - origin_time
 - ws1_time
+- ws1_planner_time
 - ws{K}_time
+- ws{K}_planner_time
 - ws{K}_opt_rate_vs_ws1
+- ws{K}_planner_opt_rate_vs_origin
 
 This guarantees that, for the same seed, all requested window sizes reuse the
 same path points and the same IK candidate set.
@@ -35,10 +38,13 @@ Notes on summary parsing
       origin.total_time_s
 - ws total time comes from:
       window.total_time_s_by_ws
+- ws planner replay time comes from:
+      trapezoid_solutions_true_plan.total_time_s_by_ws
 
 All outputs are kept under data_window/ by default:
   - raw run outputs: data_window/np{N}/seed{S}/<timestamp>/*
   - csv:             data_window/batch_csv/
+  - plots:           data_window/batch_plots/
   - per-run logs:    data_window/batch_logs/
 """
 
@@ -180,8 +186,10 @@ def _parse_window_sizes_arg(spec: str, *, num_points: int) -> List[int]:
     return out
 
 
-def _extract_summary_metrics(summary_json: Path) -> tuple[float, float, Dict[int, float]]:
-    """Return (solve_total_time_s, origin_time_s, window_total_time_s_by_ws) from one run summary.json."""
+def _extract_summary_metrics(
+    summary_json: Path,
+) -> tuple[float, float, Dict[int, float], Dict[int, float]]:
+    """Return solve/origin/window/planner-replay totals from one run summary.json."""
     with summary_json.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -228,7 +236,29 @@ def _extract_summary_metrics(summary_json: Path) -> tuple[float, float, Dict[int
                     except Exception:
                         continue
 
-    return solve_total_time_s, origin_time_s, totals_by_ws
+    planner_totals_by_ws: Dict[int, float] = {}
+    planner_replay = data.get("trapezoid_solutions_true_plan", {})
+    if isinstance(planner_replay, dict):
+        planner_total_time_s_by_ws = planner_replay.get("total_time_s_by_ws", {}) or {}
+        if isinstance(planner_total_time_s_by_ws, dict):
+            for ws_key, total_s in planner_total_time_s_by_ws.items():
+                try:
+                    planner_totals_by_ws[int(ws_key)] = float(total_s)
+                except Exception:
+                    continue
+
+        if not planner_totals_by_ws:
+            replay_results_by_ws = planner_replay.get("results_by_ws", {}) or {}
+            if isinstance(replay_results_by_ws, dict):
+                for ws_key, payload in replay_results_by_ws.items():
+                    if not isinstance(payload, dict):
+                        continue
+                    try:
+                        planner_totals_by_ws[int(ws_key)] = float(payload.get("total_time_s", math.nan))
+                    except Exception:
+                        continue
+
+    return solve_total_time_s, origin_time_s, totals_by_ws, planner_totals_by_ws
 
 
 def _extract_last_override(extra_args: Sequence[str], key: str) -> tuple[Optional[str], List[str]]:
@@ -314,6 +344,15 @@ def _relative_improvement_against_ws1(ws1_time: float, ws_time: float) -> float:
     return float((float(ws1_time) - float(ws_time)) / float(ws1_time))
 
 
+def _relative_planner_improvement_against_origin(origin_time: float, planner_time: float) -> float:
+    """Return planner replay improvement over origin: (origin - planner) / origin."""
+    if not math.isfinite(float(origin_time)) or float(origin_time) <= 0.0:
+        return math.nan
+    if not math.isfinite(float(planner_time)):
+        return math.nan
+    return float((float(origin_time) - float(planner_time)) / float(origin_time))
+
+
 def _write_summary_csv(
     *,
     out_csv: Path,
@@ -324,11 +363,15 @@ def _write_summary_csv(
     """Write one aggregated CSV row per seed."""
     _ensure_dir(out_csv.parent)
 
+    ordered_all_ws = [int(ws) for ws in window_sizes]
     ordered_other_ws = [int(ws) for ws in window_sizes if int(ws) != 1]
-    header = ["seed", "solve_total_time_s", "origin_time", "ws1_time"]
-    for ws in ordered_other_ws:
+    header = ["seed", "solve_total_time_s", "origin_time"]
+    for ws in ordered_all_ws:
         header.append(f"ws{int(ws)}_time")
+        header.append(f"ws{int(ws)}_planner_time")
+    for ws in ordered_other_ws:
         header.append(f"ws{int(ws)}_opt_rate_vs_ws1")
+        header.append(f"ws{int(ws)}_planner_opt_rate_vs_origin")
 
     with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -338,6 +381,7 @@ def _write_summary_csv(
             solve_total_time_s = math.nan
             origin_time_s = math.nan
             total_time_s_by_ws: Dict[int, float] = {}
+            planner_time_s_by_ws: Dict[int, float] = {}
 
             if isinstance(payload, dict):
                 try:
@@ -355,13 +399,25 @@ def _write_summary_csv(
                             total_time_s_by_ws[int(ws_key)] = float(total_s)
                         except Exception:
                             continue
+                raw_planner_totals = payload.get("planner_time_s_by_ws", {})
+                if isinstance(raw_planner_totals, dict):
+                    for ws_key, total_s in raw_planner_totals.items():
+                        try:
+                            planner_time_s_by_ws[int(ws_key)] = float(total_s)
+                        except Exception:
+                            continue
 
             ws1_time = float(total_time_s_by_ws.get(1, math.nan))
-            row: List[object] = [int(seed), solve_total_time_s, origin_time_s, ws1_time]
-            for ws in ordered_other_ws:
+            row: List[object] = [int(seed), solve_total_time_s, origin_time_s]
+            for ws in ordered_all_ws:
                 ws_time = float(total_time_s_by_ws.get(int(ws), math.nan))
                 row.append(ws_time)
+                row.append(float(planner_time_s_by_ws.get(int(ws), math.nan)))
+            for ws in ordered_other_ws:
+                ws_time = float(total_time_s_by_ws.get(int(ws), math.nan))
                 row.append(_relative_improvement_against_ws1(ws1_time, ws_time))
+                ws_planner_time = float(planner_time_s_by_ws.get(int(ws), math.nan))
+                row.append(_relative_planner_improvement_against_origin(origin_time_s, ws_planner_time))
             w.writerow(row)
 
 
@@ -432,7 +488,14 @@ def main() -> int:
         default="data_window/batch_logs",
         help="Dir for per-run ros2 logs (default: data_window/batch_logs).",
     )
+    ap.add_argument(
+        "--plot-dir",
+        type=str,
+        default="data_window/batch_plots",
+        help="Dir for summary plot PNGs (default: data_window/batch_plots).",
+    )
     ap.add_argument("--no-logs", action="store_true", help="Print ros2 output to console instead of logs.")
+    ap.add_argument("--no-plots", action="store_true", help="Skip automatic plot generation after CSV export.")
 
     ap.add_argument(
         "--extra",
@@ -452,6 +515,7 @@ def main() -> int:
     base_data_root = Path(args.base_data_root)
     csv_dir = Path(args.csv_dir)
     log_dir = Path(args.log_dir)
+    plot_dir = Path(args.plot_dir)
 
     raw_extra_args = [a for a in args.extra.split() if a.strip()]
 
@@ -481,6 +545,7 @@ def main() -> int:
     print(f"  base_data_root  = {base_data_root}")
     print(f"  csv_dir         = {csv_dir}")
     print(f"  log_dir         = {log_dir} (enabled={not args.no_logs})")
+    print(f"  plot_dir        = {plot_dir} (enabled={not args.no_plots})")
     if extra_args:
         print(f"  extra args      = {extra_args}")
 
@@ -533,6 +598,7 @@ def main() -> int:
                 "solve_total_time_s": math.nan,
                 "origin_time_s": math.nan,
                 "total_time_s_by_ws": {int(ws): math.nan for ws in window_sizes},
+                "planner_time_s_by_ws": {int(ws): math.nan for ws in window_sizes},
             }
             continue
 
@@ -544,12 +610,15 @@ def main() -> int:
             )
             end_ts = _now_str()
             print(f"[batch][{end_ts}] summary: {summary_path}")
-            solve_total_time_s, origin_time_s, total_time_s_by_ws = _extract_summary_metrics(summary_path)
+            solve_total_time_s, origin_time_s, total_time_s_by_ws, planner_time_s_by_ws = _extract_summary_metrics(summary_path)
             summary_by_seed[int(seed)] = {
                 "solve_total_time_s": float(solve_total_time_s),
                 "origin_time_s": float(origin_time_s),
                 "total_time_s_by_ws": {
                     int(ws): float(total_time_s_by_ws.get(int(ws), math.nan)) for ws in window_sizes
+                },
+                "planner_time_s_by_ws": {
+                    int(ws): float(planner_time_s_by_ws.get(int(ws), math.nan)) for ws in window_sizes
                 },
             }
             print(f"[batch][{end_ts}] solve_total_time_s = {solve_total_time_s}")
@@ -557,6 +626,10 @@ def main() -> int:
             print(
                 f"[batch][{end_ts}] window_total_time_s_by_ws = "
                 f"{summary_by_seed[int(seed)]['total_time_s_by_ws']}"
+            )
+            print(
+                f"[batch][{end_ts}] planner_time_s_by_ws = "
+                f"{summary_by_seed[int(seed)]['planner_time_s_by_ws']}"
             )
         except Exception as e:
             print(
@@ -566,6 +639,7 @@ def main() -> int:
                 "solve_total_time_s": math.nan,
                 "origin_time_s": math.nan,
                 "total_time_s_by_ws": {int(ws): math.nan for ws in window_sizes},
+                "planner_time_s_by_ws": {int(ws): math.nan for ws in window_sizes},
             }
 
     out_csv = csv_dir / f"np{num_points}_ws{window_slug}_summary.csv"
@@ -576,6 +650,18 @@ def main() -> int:
         summary_by_seed=summary_by_seed,
     )
     print(f"\n[batch] CSV written: {out_csv}\n")
+
+    if not bool(args.no_plots):
+        try:
+            try:
+                from plot_batch_csv import plot_batch_summary_csv
+            except ImportError:
+                from script.plot_batch_csv import plot_batch_summary_csv
+
+            out_plot = plot_batch_summary_csv(out_csv, out_dir=plot_dir)
+            print(f"[batch] Plot written: {out_plot}\n")
+        except Exception as e:
+            print(f"[batch][WARN] Failed to generate plot for {out_csv}: {e}\n")
 
     print("[batch] all done.")
     return 0

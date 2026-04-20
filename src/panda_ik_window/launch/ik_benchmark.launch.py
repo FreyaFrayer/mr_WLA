@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import yaml
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -8,6 +9,13 @@ from launch_ros.actions import Node
 import os
 from moveit_configs_utils import MoveItConfigsBuilder
 from ament_index_python.packages import get_package_share_directory
+
+
+def _load_yaml(package_name: str, file_path: str):
+    package_path = get_package_share_directory(package_name)
+    absolute_file_path = os.path.join(package_path, file_path)
+    with open(absolute_file_path, "r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -70,6 +78,11 @@ def generate_launch_description() -> LaunchDescription:
         .moveit_cpp(file_path=moveit_cpp_yaml)
         .to_moveit_configs()
     )
+    moveit_params = moveit_config.to_dict()
+    moveit_params["robot_description_kinematics"] = _load_yaml(
+        "moveit_resources_panda_moveit_config",
+        "config/trac_ik_kinematics.yaml",
+    )
 
     return LaunchDescription(
         [
@@ -105,7 +118,7 @@ def generate_launch_description() -> LaunchDescription:
                 package="panda_ik_window",
                 executable="ik_window",
                 output="screen",
-                parameters=[moveit_config.to_dict()],
+                parameters=[moveit_params],
                 arguments=[
                     "--num-points",
                     num_points,
